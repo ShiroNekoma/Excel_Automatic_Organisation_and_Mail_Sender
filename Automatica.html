@@ -9,10 +9,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     
     :root {
-      --blue-deep:   #0f2d4a; /* Enhanced Deeper Professional Blue */
+      --blue-deep:   #0f2d4a; /* Azul corporativo profundo */
       --blue-mid:    #1d4ed8;
-      --blue-light:  #f4f7fa; /* Clean modern background grey-blue tint */
-      --yellow:      #e5b113; /* Richer Gold/Yellow for high contrast contrast */
+      --blue-light:  #f4f7fa; /* Fondo gris-azul limpio */
+      --yellow:      #e5b113; /* Dorado/Amarillo premium */
       --yellow-soft: #fef9c3;
       --white:       #ffffff;
       --text-main:   #1e293b;
@@ -32,61 +32,91 @@
       line-height: 1.5;
     }
 
-    /* Primary Container layout with dynamic responsive column mapping */
+    @media (min-width: 768px) {
+      body { padding: 2.5rem 2rem; }
+    }
+
+    /* Contenedor Principal Centralizado */
     .dashboard-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      max-width: 1600px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
-    @media (min-width: 1024px) {
-      body { padding: 2rem; }
-      .dashboard-container {
-        grid-template-columns: 380px 1fr;
-      }
-    }
-
-    /* Cards Layout Base Style */
-    .glass-card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--gray-border);
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(15, 45, 74, 0.03), 0 10px 15px -3px rgba(15, 45, 74, 0.05);
-      transition: var(--transition);
-    }
-
-    @media (min-width: 640px) {
-      .glass-card { padding: 2rem; }
-    }
-
-    h2 {
-      font-family: 'Syne', sans-serif;
-      color: var(--blue-deep);
-      font-size: 1.5rem;
+    /* Sistema de Pestañas Navegación Superior */
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
       margin-bottom: 1.5rem;
-      position: relative;
-      padding-bottom: 0.6rem;
       border-bottom: 2px solid var(--gray-border);
+      padding-bottom: 1px;
     }
 
-    h2::after {
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--blue-deep);
+    }
+
+    .tab-btn.active {
+      color: var(--blue-deep);
+    }
+
+    .tab-btn.active::after {
       content: '';
       position: absolute;
-      bottom: -2px;
+      bottom: -3px;
       left: 0;
-      width: 60px;
+      width: 100%;
       height: 3px;
       background: var(--yellow);
       border-radius: 2px;
     }
 
-    /* Dynamic Flash Alerts UI Arrangement */
+    /* Contenedores de las Ventanas Inactivas/Activas */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.35s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Estilos Estilizados de Tarjeta (Glassmorphism sutil) */
+    .glass-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-border);
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(15, 45, 74, 0.02), 0 10px 15px -3px rgba(15, 45, 74, 0.04);
+    }
+
+    @media (min-width: 640px) {
+      .glass-card { padding: 2.5rem; }
+    }
+
+    h2 {
+      font-family: 'Syne', sans-serif;
+      color: var(--blue-deep);
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Alertas de Notificación Dinámicas */
     .flash-container {
       margin-bottom: 1.25rem;
-      min-height: 0px;
     }
     
     .alert {
@@ -96,18 +126,31 @@
       font-weight: 500;
       display: none;
       animation: fadeIn 0.3s ease-in-out;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
     .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Form Design Fields */
-    .form-group { margin-bottom: 1.25rem; }
+    /* Formulario Form Matrix Grid (Mejorado para PC) */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+    }
+
+    .form-group { display: flex; flex-direction: column; }
     
     label { 
-      display: block; 
       font-size: 0.75rem; 
       font-weight: 700; 
       color: var(--blue-deep); 
@@ -126,7 +169,7 @@
       color: var(--text-main);
       background: #f8fafc;
       transition: var(--transition);
-      -webkit-appearance: none; /* Uniform styling clean defaults */
+      -webkit-appearance: none;
     }
     
     select {
@@ -150,6 +193,10 @@
       cursor: not-allowed;
     }
 
+    .submit-container {
+      margin-top: 1.5rem;
+    }
+
     .submit-btn {
       width: 100%;
       background: var(--blue-deep);
@@ -161,31 +208,30 @@
       font-size: 1rem;
       cursor: pointer;
       transition: var(--transition);
-      box-shadow: 0 4px 6px -1px rgba(15, 45, 74, 0.2);
+      box-shadow: 0 4px 6px -1px rgba(15, 45, 74, 0.15);
     }
+    
     .submit-btn:hover { 
       background: #153e66; 
       transform: translateY(-1px);
     }
     .submit-btn:active { transform: translateY(0); }
 
-    /* Datatable Layout Styling Rules */
+    /* Estructura Adaptativa del Datatable */
     .table-container { 
       overflow-x: auto; 
-      margin-top: 1rem; 
       border-radius: var(--radius-md);
       border: 1px solid var(--gray-border);
-      -webkit-overflow-scrolling: touch; /* Smooth inertia on Apple elements */
+      -webkit-overflow-scrolling: touch;
     }
     
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 800px; }
-    th { background: #f8fafc; color: var(--blue-deep); padding: 1rem; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; border-bottom: 2px solid var(--gray-border); }
-    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: #334155; line-height: 1.5; vertical-align: middle; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 900px; }
+    th { background: #f8fafc; color: var(--blue-deep); padding: 1.2rem 1rem; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; border-bottom: 2px solid var(--gray-border); }
+    td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--gray-border); color: #334155; line-height: 1.5; vertical-align: middle; }
     
     tr { transition: var(--transition); }
     tr:hover { background-color: #f8fafc; }
 
-    /* Overdue Highlighting Framework Classes */
     tr.task-overdue { background-color: var(--yellow-soft) !important; }
     tr.task-overdue:hover { background-color: #fef08a !important; }
 
@@ -202,7 +248,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* Badge Color Priorities Matrix */
     .priority-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
     .priority-badge.high { background: #fee2e2; color: #991b1b; }
     .priority-badge.medium { background: #ffedd5; color: #9a3412; }
@@ -226,99 +271,124 @@
 
   <div class="dashboard-container">
     
-    <div class="glass-card">
-      <h2>Add New Action</h2>
-      <div class="flash-container"><div id="formFlash" class="alert"></div></div>
-      
-      <form id="taskForm">
-        <div class="form-group">
-          <label>Project / Initiative</label>
-          <input type="text" name="project" required placeholder="e.g., Coop, Renewable Bid" />
-        </div>
-        <div class="form-group">
-          <label>Institution / Country</label>
-          <input type="text" name="institution" required placeholder="e.g., Netherlands, MASEN" />
-        </div>
-        <div class="form-group">
-          <label>Action / Description</label>
-          <textarea name="action" rows="3" required placeholder="Enter primary assignment narrative description details..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select name="category">
-            <option value="Courrier officiel">Courrier officiel</option>
-            <option value="Coordination">Coordination</option>
-            <option value="Réunion">Réunion / Event</option>
-            <option value="Autre">Autre Cas</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Priority</label>
-          <select name="priority">
-            <option value="Low">Low Priority</option>
-            <option value="Medium" selected>Medium Priority</option>
-            <option value="High">High Priority</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="date" name="dueDate" required />
-        </div>
-        <div class="form-group">
-          <label>Request Date</label>
-          <input type="text" id="requestDate" name="requestDate" readonly />
-        </div>
-        <div class="form-group">
-          <label>Owner Allocation</label>
-          <input type="text" name="owner" placeholder="Staff Name Allocation" />
-        </div>
-        <div class="form-group">
-          <label>Target Sheet Tab Routing</label>
-          <select id="sheetSelector" name="targetSheet">
-            <option value="BackEnd">Default (BackEnd Ledger Only)</option>
-            <option value="Global Affairs">Global Affairs Tab</option>
-            <option value="Custom">-- Route to Custom Tab Name --</option>
-          </select>
-        </div>
-        <div class="form-group" id="customSheetContainer" style="display: none;">
-          <label>Custom Tab Sheet Name</label>
-          <input type="text" id="customSheetInput" placeholder="Enter precise Excel Tab String Name" />
-        </div>
-        <div class="form-group">
-          <label>Comments / Internal Notes</label>
-          <textarea name="comments" rows="2" placeholder="Optional comments context..."></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Ingest To System Pipeline</button>
-      </form>
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(event, 'add-task-tab')">Add New Action</button>
+      <button class="tab-btn" onclick="switchTab(event, 'complete-task-tab')">Live Operational Matrix</button>
+    </div>
+    
+    <div id="add-task-tab" class="tab-content active">
+      <div class="glass-card">
+        <h2>Add New Action Details</h2>
+        <div class="flash-container"><div id="formFlash" class="alert"></div></div>
+        
+        <form id="taskForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Project / Initiative</label>
+              <input type="text" name="project" required placeholder="e.g., Coop, Renewable Bid" />
+            </div>
+            <div class="form-group">
+              <label>Institution / Country</label>
+              <input type="text" name="institution" required placeholder="e.g., Netherlands, MASEN" />
+            </div>
+            <div class="form-group full-width">
+              <label>Action / Description</label>
+              <textarea name="action" rows="3" required placeholder="Enter primary assignment narrative description details..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select name="category">
+                <option value="Courrier officiel">Courrier officiel</option>
+                <option value="Coordination">Coordination</option>
+                <option value="Réunion">Réunion / Event</option>
+                <option value="Autre">Autre Cas</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select name="priority">
+                <option value="Low">Low Priority</option>
+                <option value="Medium" selected>Medium Priority</option>
+                <option value="High">High Priority</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Due Date</label>
+              <input type="date" name="dueDate" required />
+            </div>
+            <div class="form-group">
+              <label>Request Date</label>
+              <input type="text" id="requestDate" name="requestDate" readonly />
+            </div>
+            <div class="form-group">
+              <label>Owner Allocation</label>
+              <input type="text" name="owner" placeholder="Staff Name Allocation" />
+            </div>
+            <div class="form-group">
+              <label>Target Sheet Tab Routing</label>
+              <select id="sheetSelector" name="targetSheet">
+                <option value="BackEnd">Default (BackEnd Ledger Only)</option>
+                <option value="Global Affairs">Global Affairs Tab</option>
+                <option value="Custom">-- Route to Custom Tab Name --</option>
+              </select>
+            </div>
+            <div class="form-group full-width" id="customSheetContainer" style="display: none;">
+              <label>Custom Tab Sheet Name</label>
+              <input type="text" id="customSheetInput" placeholder="Enter precise Excel Tab String Name" />
+            </div>
+            <div class="form-group full-width">
+              <label>Comments / Internal Notes</label>
+              <textarea name="comments" rows="2" placeholder="Optional comments context..."></textarea>
+            </div>
+          </div>
+          <div class="submit-container">
+            <button type="submit" class="submit-btn">Ingest To System Pipeline</button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <div class="glass-card">
-      <h2>Live Operational Matrix</h2>
-      <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
-      
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Institution</th>
-              <th>Action Details</th>
-              <th>Category</th>
-              <th>Priority</th>
-              <th>Due Date</th>
-              <th>Owner</th>
-              <th>Operation</th>
-            </tr>
-          </thead>
-          <tbody id="taskTableBody">
-            </tbody>
-        </table>
+    <div id="complete-task-tab" class="tab-content">
+      <div class="glass-card">
+        <h2>Live Outstanding Operational Matrix</h2>
+        <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Institution</th>
+                <th>Action Details</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+                <th>Owner</th>
+                <th>Operation</th>
+              </tr>
+            </thead>
+            <tbody id="taskTableBody">
+              </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
   </div>
 
   <script>
+    // Lógica nativa para alternar entre pestañas de manera fluida
+    function switchTab(event, tabId) {
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(tab => tab.classList.remove('active'));
+
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
     const form = document.getElementById('taskForm');
     const tableBody = document.getElementById('taskTableBody');
     const formFlash = document.getElementById('formFlash');
@@ -407,7 +477,7 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch {
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#9b2c2c; padding: 2rem;">Active layout buffer error sync drops.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#dc2626; padding: 2rem;">Active layout buffer error sync drops.</td></tr>`;
       }
     }
 
