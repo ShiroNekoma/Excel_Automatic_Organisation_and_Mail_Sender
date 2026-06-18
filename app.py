@@ -10,9 +10,9 @@ app = Flask(__name__, template_folder='.')
 # --- GMAIL CONFIGURATION ---
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SENDER_EMAIL = "nouamaneapp@gmail.com"
-SENDER_PASSWORD = "wshn fvcm khun xbwq"  # Your secure App Password
-RECEIVER_EMAIL = "nouamaneapp@gmail.com"  # Sends the data back to yourself
+SENDER_EMAIL = "nouijai.ghassane@gmail.com"
+SENDER_PASSWORD = "smstybvygospvxrs"  
+RECEIVER_EMAIL = "nouijai.ghassane@gmail.com"  
 
 def send_data_email(subject, payload):
     """Sends a machine-readable email to the local broker script."""
