@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Global Affairs Tracker Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     
     :root {
-      --slate-deep:   #1e293b; /* Primary dark text/headers */
-      --slate-mid:    #475569;  /* Secondary textual elements */
-      --slate-light:  #f1f5f9;/* Content canvas gray background */
-      --navy-blue:    #0f172a;  /* Heavy structural borders and focal points */
-      --accent-blue:  #3b82f6; /* Action buttons and interaction bounds */
-      --overdue-blue: #e0f2fe; /* NEW: Light blue highlight for overdue entries */
-      --overdue-text: #0369a1; /* NEW: Dark blue text color for overdue entries */
-      --white:       #ffffff;
-      --gray-border: #cbd5e1;
-      --radius:      8px;
+      --slate-deep:   #1e293b; /* Primary Dark */
+      --slate-mid:    #475569;  /* Secondary Gray text */
+      --slate-light:  #f8fafc;  /* Soft clean gray canvas background */
+      --navy-blue:    #0f172a;  /* Headers and borders */
+      --accent-blue:  #2563eb;  /* Buttons */
+      --overdue-bg:   #e0f2fe;  /* LIGHT BLUE for overdue background */
+      --overdue-text: #0369a1;  /* DARK BLUE for overdue text */
+      --white:        #ffffff;
+      --gray-border:  #cbd5e1;
+      --radius:       8px;
     }
 
     body {
@@ -29,7 +29,7 @@
       color: var(--slate-deep);
     }
 
-    /* Fixed Widescreen 2-Column Desktop Grid Layout */
+    /* Fixed Widescreen 2-Column Grid */
     .dashboard-container {
       display: grid;
       grid-template-columns: 420px 1fr;
@@ -43,13 +43,13 @@
       border-radius: var(--radius);
       border: 1px solid var(--gray-border);
       padding: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       height: fit-content;
     }
 
     h2 {
       color: var(--navy-blue);
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
       border-bottom: 2px solid var(--gray-border);
@@ -58,7 +58,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* System Status Messages */
+    /* Notifications Banners */
     .flash-container {
       margin-bottom: 1rem;
       min-height: 40px;
@@ -73,7 +73,7 @@
     .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
     .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
-    /* Ingestion Form Elements (Unchanged Layout Structures) */
+    /* Ingestion Form Elements (Strictly preserved/unchanged) */
     .form-group { margin-bottom: 1.2rem; }
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--slate-mid); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
@@ -86,8 +86,8 @@
       color: var(--slate-deep);
       background: var(--white);
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-    input[readonly] { background-color: var(--slate-light); color: var(--slate-mid); cursor: not-allowed; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.12); }
+    input[readonly] { background-color: #e2e8f0; color: var(--slate-mid); cursor: not-allowed; }
 
     .submit-btn {
       width: 100%;
@@ -104,18 +104,15 @@
     }
     .submit-btn:hover { background: var(--accent-blue); }
 
-    /* Strict Permanent Column Matrices Setup */
+    /* Streamlined 4-Column Table Grid Architecture */
     .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius); border: 1px solid var(--gray-border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    th:nth-child(1), td:nth-child(1) { width: 12%; }
-    th:nth-child(2), td:nth-child(2) { width: 13%; }
-    th:nth-child(3), td:nth-child(3) { width: 32%; }
-    th:nth-child(4), td:nth-child(4) { width: 10%; }
-    th:nth-child(5), td:nth-child(5) { width: 10%; }
-    th:nth-child(6), td:nth-child(6) { width: 11%; }
-    th:nth-child(7), td:nth-child(7) { width: 12%; }
-    th:nth-child(8), td:nth-child(8) { width: 10%; }
+    /* Explicit locked column widths to prevent column collapse */
+    th:nth-child(1), td:nth-child(1) { width: 55%; } /* Rich Action Details */
+    th:nth-child(2), td:nth-child(2) { width: 15%; } /* Due Date */
+    th:nth-child(3), td:nth-child(3) { width: 15%; } /* Owner */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Action Operation */
 
     th { background: var(--navy-blue); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
     td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--slate-mid); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
@@ -123,8 +120,8 @@
     tr { background-color: var(--white); }
     tr:hover { background-color: var(--slate-light); }
 
-    /* NEW: Overdue Highlighting Theme (Light Blue Palette Adaptation) */
-    tr.task-overdue { background-color: var(--overdue-blue) !important; }
+    /* Light Blue Theme for Overdue Rows */
+    tr.task-overdue { background-color: var(--overdue-bg) !important; }
     tr.task-overdue td { color: var(--overdue-text); }
     tr.task-overdue strong { color: var(--navy-blue); }
 
@@ -133,24 +130,19 @@
       color: var(--white);
       font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
+      padding: 0.15rem 0.4rem;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-top: 0.4rem;
+      margin-top: 0.3rem;
       display: inline-block;
     }
 
-    /* Badges & Operations Layout Controls */
-    .priority-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; text-align: center; }
-    .priority-badge.high, .priority-badge.critical { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
-    .priority-badge.medium { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .priority-badge.low { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-
-    .badge-tab { background: var(--slate-light); color: var(--slate-deep); border: 1px solid var(--gray-border); padding: 0.2rem 0.4rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; }
+    .badge-tab { background: var(--slate-light); color: var(--slate-deep); border: 1px solid var(--gray-border); padding: 0.15rem 0.3rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; margin-right: 0.4rem; }
+    .badge-cat { background: #e2e8f0; color: #334155; padding: 0.15rem 0.3rem; font-size: 0.7rem; font-weight: 500; border-radius: 4px; display: inline-block; }
 
     .action-btn { padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; transition: all 0.15s; }
     .clear-btn { background: var(--slate-light); border: 1px solid var(--gray-border); color: var(--slate-deep); }
-    .clear-btn:hover { background: var(--slate-deep); border-color: var(--slate-deep); color: var(--white); }
+    .clear-btn:hover { background: #b91c1c; border-color: #b91c1c; color: var(--white); }
 
     @media (max-width: 900px) { 
       .dashboard-container { grid-template-columns: 1fr; } 
@@ -248,18 +240,14 @@
         <table>
           <thead>
             <tr>
-              <th>Project</th>
-              <th>Institution</th>
               <th>Action Details</th>
-              <th>Category</th>
-              <th>Priority</th>
               <th>Due Date</th>
               <th>Owner</th>
               <th>Operation</th>
             </tr>
           </thead>
           <tbody id="taskTableBody">
-            <tr><td colspan="8" style="text-align:center; padding:2rem;">Connecting with live operational data matrices...</td></tr>
+            <tr><td colspan="4" style="text-align:center; padding:2rem;">Connecting with live operational data matrices...</td></tr>
           </tbody>
         </table>
       </div>
@@ -309,7 +297,7 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No active tracking rows inside central repository.</td></tr>`;
           return;
         }
 
@@ -318,6 +306,7 @@
           let rawDueDate = task.dueDate || task.due_date || '';
           let cleanDateStr = String(rawDueDate).trim();
 
+          // Safe Due Date processing logic
           if (cleanDateStr && cleanDateStr.toLowerCase() !== 'n/a' && cleanDateStr.toLowerCase() !== 'none') {
             let taskDueDateObj;
             if (cleanDateStr.includes('/')) {
@@ -334,27 +323,32 @@
             }
           }
 
-          // Strict assignment to prevent formatting breaks
           const rowStyle = isOverdue ? 'class="task-overdue"' : '';
           const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue</span>` : '';
           
-          const taskPriority = task.priority ? task.priority.toString() : 'Medium';
-          const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
-          
           let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
+
+          // Clean sanitization of textual parameters to prevent data corruption crashes
+          const projName = task.project || 'N/A';
+          const instName = task.institution || 'N/A';
+          const actionDesc = task.action || 'Untitled Action';
+          const catName = task.category || 'N/A';
+          const tabName = task.sheet || task.targetSheet || 'BackEnd';
+          const ownerName = task.owner || 'Unassigned';
 
           const rowHtml = `
             <tr ${rowStyle}>
-              <td><strong>${task.project || 'N/A'}</strong></td>
-              <td>${task.institution || 'N/A'}</td>
               <td>
-                <span class="badge-tab" style="margin-bottom:0.3rem;">${task.sheet || 'BackEnd'}</span><br>
-                ${task.action || 'Untitled Action'} ${tagSpan}
+                <div style="margin-bottom: 0.4rem;">
+                  <span class="badge-tab">${tabName}</span>
+                  <span class="badge-cat">${catName}</span>
+                </div>
+                <strong>${projName}</strong> — <span style="color:var(--slate-mid); font-size:0.85rem;">${instName}</span>
+                <p style="margin-top:0.3rem; color:var(--slate-deep); font-weight:500;">${actionDesc}</p>
+                ${tagSpan}
               </td>
-              <td>${task.category || 'N/A'}</td>
-              <td><span class="priority-badge ${priorityClass}">${taskPriority}</span></td>
               <td><strong>${cleanDateStr || 'N/A'}</strong></td>
-              <td><code>${task.owner || 'Unassigned'}</code></td>
+              <td><code>${ownerName}</code></td>
               <td>
                 <button class="action-btn clear-btn" onclick="archiveTaskRow(${activeRowIndex})">
                   Complete
@@ -365,7 +359,7 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#991b1b; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#991b1b; padding:2rem;">Active registry synchronization error.</td></tr>`;
       }
     }
 
@@ -375,7 +369,7 @@
         return;
       }
       try {
-        // Enforces structural backend mapping consistency matching app.py exactly
+        // Enforces structural backend mapping consistency matching mail_reader.py exactly
         const res = await fetch('/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -383,7 +377,7 @@
         });
         
         if (res.ok) {
-          alertBox(feedFlash, '✓ Action queued successfully! The local background engine script will migrate this row item to the Finished Excel spreadsheet momentarily.', 'success');
+          alertBox(feedFlash, '✓ Row cleared! Local script will migrate this item to the Finished sheet shortly.', 'success');
           loadActiveTasksRegistry();
         } else {
           alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
