@@ -105,10 +105,11 @@
     th { background: var(--blue-deep); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
     td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: #475569; line-height: 1.4; vertical-align: middle; }
     
+    tr { transition: background-color 0.15s ease; }
     tr:hover { background-color: #f8fafc; }
 
     /* Overdue Highlighting Framework Classes */
-    tr.task-overdue { background-color: #fdf3c0 !important; }
+    tr.task-overdue { background-color: var(--yellow-soft) !important; }
     tr.task-overdue:hover { background-color: #fbeba8 !important; }
 
     .badge-overdue {
@@ -122,6 +123,7 @@
       margin-left: 0.6rem;
       display: inline-block;
       letter-spacing: 0.3px;
+      vertical-align: middle;
     }
 
     /* Badge Color Priorities Matrix */
@@ -226,7 +228,7 @@
             </tr>
           </thead>
           <tbody id="taskTableBody">
-            </tbody>
+          </tbody>
         </table>
       </div>
     </div>
@@ -295,7 +297,7 @@
           let isOverdue = false;
           let dateStr = (task.dueDate || '').trim();
 
-          // Evaluate timestamp conditions
+          // Evaluate timestamp conditions dynamically against standard DD/MM/YYYY text patterns
           if (dateStr && dateStr.toLowerCase() !== 'n/a' && dateStr.toLowerCase() !== 'none') {
             const parts = dateStr.split('/');
             if (parts.length === 3) {
