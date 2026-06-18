@@ -13,7 +13,6 @@
       --blue-mid:    #2563a8;
       --blue-light:  #f0f4f8;
       --yellow-soft: #fdf3c0;
-      --yellow-dark: #b78a02;
       --white:       #ffffff;
       --gray-border: #e2e8f0;
       --gray-text:   #475569;
@@ -73,7 +72,7 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Clean Input Forms Layout styling */
+    /* Forms Input Layout */
     .form-group { margin-bottom: 1.2rem; }
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--blue-deep); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
@@ -105,11 +104,11 @@
     }
     .submit-btn:hover { background: var(--blue-mid); }
 
-    /* High Quality Table Layout Styles */
+    /* High Quality Fixed Table Layout Structure */
     .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--gray-border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    /* Strict Width Controls to Stop Text Overflow Collapses */
+    /* Enforces Permanent Strict Column Widths */
     th:nth-child(1), td:nth-child(1) { width: 12%; } /* Project */
     th:nth-child(2), td:nth-child(2) { width: 13%; } /* Institution */
     th:nth-child(3), td:nth-child(3) { width: 32%; } /* Action Details */
@@ -138,12 +137,10 @@
       padding: 0.2rem 0.4rem;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-left: 0.5rem;
+      margin-top: 0.4rem;
       display: inline-block;
-      vertical-align: middle;
     }
 
-    /* Badges & Action Items Styling Elements */
     .priority-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; text-align: center; }
     .priority-badge.high, .priority-badge.critical { background: #fed7d7; color: #9b2c2c; }
     .priority-badge.medium { background: #feebc8; color: #c05621; }
@@ -155,7 +152,6 @@
     .clear-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
     .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); box-shadow: 0 2px 4px rgba(229,62,62,0.2); }
 
-    /* Retains neat desktop stacking ONLY on small tablet screens */
     @media (max-width: 900px) { 
       .dashboard-container { grid-template-columns: 1fr; } 
     }
@@ -281,7 +277,6 @@
     const customSheetInput = document.getElementById('customSheetInput');
     const reqDateInput = document.getElementById('requestDate');
 
-    // Create target time comparisons
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     reqDateInput.value = todayStr;
@@ -314,14 +309,12 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clear! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
           return;
         }
 
         tasks.forEach(task => {
           let isOverdue = false;
-          
-          // MATCHING EXCEL DICTIONARY DICT FROM mail_reader.py LINE 39 -> task["dueDate"]
           let rawDueDate = task.dueDate || task.due_date || '';
           let cleanDateStr = String(rawDueDate).trim();
 
@@ -347,7 +340,7 @@
           const taskPriority = task.priority ? task.priority.toString() : 'Medium';
           const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
           
-          // MATCHING EXCEL DICTIONARY DICT FROM mail_reader.py LINE 43 -> task["backendRowIndex"]
+          // Fallback check to safely grab index key definitions
           let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
 
           const rowHtml = `
@@ -382,6 +375,7 @@
         return;
       }
       try {
+        // FIXED FOR APP.PY EXPECTATIONS: Using snake_case property keys
         const res = await fetch('/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -389,7 +383,7 @@
         });
         
         if (res.ok) {
-          alertBox(feedFlash, '✓ Row cleared from project registry and moved to Finished bin!', 'success');
+          alertBox(feedFlash, '✓ Action queued! Local script will move this task to the Finished spreadsheet shortly.', 'success');
           loadActiveTasksRegistry();
         } else {
           alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
