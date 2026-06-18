@@ -25,7 +25,7 @@
       padding: 1.5rem;
     }
 
-    /* Main Grid: Maintains the two-column view on desktop */
+    /* Primary Container Layout Grid: Enforces the side-by-side view on desktop monitors */
     .dashboard-container {
       display: grid;
       grid-template-columns: 420px 1fr;
@@ -106,7 +106,7 @@
     tr { transition: background-color 0.15s ease; }
     tr:hover { background-color: #f8fafc; }
 
-    /* Visual Overdue Highlighting Background Style */
+    /* Yellow Overdue Background Color Rules */
     tr.task-overdue { background-color: var(--yellow-soft) !important; }
     tr.task-overdue:hover { background-color: #fbeba8 !important; }
 
@@ -135,7 +135,7 @@
     .clear-btn { background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; }
     .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); }
 
-    /* Balanced breakpoint: Stacks cleanly only when screen sizes drop below tablet format */
+    /* Safe Breakpoint - Shifts layout only on tiny mobile views */
     @media (max-width: 768px) { 
       .dashboard-container { grid-template-columns: 1fr; } 
     }
@@ -171,15 +171,15 @@
         </div>
         <div class="form-group">
           <label>Project / Initiative</label>
-          <input type="text" name="project" required placeholder="e.g., Initiative Name" />
+          <input type="text" name="project" required placeholder="Project Title" />
         </div>
         <div class="form-group">
           <label>Institution</label>
-          <input type="text" name="institution" required placeholder="e.g., Ministry, Corporate Body" />
+          <input type="text" name="institution" required placeholder="Target Institution" />
         </div>
         <div class="form-group">
           <label>Key Contacts</label>
-          <input type="text" name="contacts" required placeholder="Contact info strings" />
+          <input type="text" name="contacts" required placeholder="Contact data context" />
         </div>
         <div class="form-group">
           <label>Owner Allocation</label>
@@ -214,7 +214,7 @@
         </div>
         <div class="form-group">
           <label>Action / Description</label>
-          <input type="text" name="action" required placeholder="Short narrative summary assignment..." />
+          <input type="text" name="action" required placeholder="Primary directive assignment description..." />
         </div>
         <div class="form-group">
           <label>Notes / Email Body Text</label>
@@ -243,7 +243,7 @@
             </tr>
           </thead>
           <tbody id="taskTableBody">
-            <tr><td colspan="8" style="text-align:center; padding:2rem;">Loading rows from active tracking system...</td></tr>
+            <tr><td colspan="8" style="text-align:center; padding:2rem;">Synchronizing operational records cache array matrix...</td></tr>
           </tbody>
         </table>
       </div>
@@ -263,7 +263,7 @@
 
     const escapeHtml = (str) => str.replace(/'/g, "\\'");
 
-    // Synchronize current local context timestamp strings
+    // Synchronize request tracking calendar date parameters
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     reqDateInput.value = todayStr;
@@ -296,21 +296,24 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem;">✓ All clear! No active tracking rows inside repository.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem;">✓ All clear! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
           return;
         }
 
         tasks.forEach(task => {
           let isOverdue = false;
-          let dateStr = (task.due_date || '').trim();
+          
+          // CRITICAL SYSTEM FIX: Map backend 'dueDate' parameter correctly
+          let rawDueDate = task.dueDate || task.due_date || '';
+          let cleanDateStr = String(rawDueDate).trim();
 
-          if (dateStr && dateStr.toLowerCase() !== 'n/a' && dateStr.toLowerCase() !== 'none') {
+          if (cleanDateStr && cleanDateStr.toLowerCase() !== 'n/a' && cleanDateStr.toLowerCase() !== 'none') {
             let taskDueDateObj;
-            if (dateStr.includes('/')) {
-              const parts = dateStr.split('/');
+            if (cleanDateStr.includes('/')) {
+              const parts = cleanDateStr.split('/');
               taskDueDateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-            } else if (dateStr.includes('-')) {
-              taskDueDateObj = new Date(dateStr + "T00:00:00");
+            } else if (cleanDateStr.includes('-')) {
+              taskDueDateObj = new Date(cleanDateStr + "T00:00:00");
             }
 
             if (taskDueDateObj && !isNaN(taskDueDateObj.getTime())) {
@@ -321,9 +324,13 @@
           }
 
           const rowStyle = isOverdue ? 'class="task-overdue"' : '';
-          const tagSpan = isOverdue ? `<span class="badge-overdue">Overdue (Due: ${task.due_date})</span>` : '';
+          const tagSpan = isOverdue ? `<span class="badge-overdue">Overdue (Due: ${cleanDateStr})</span>` : '';
+          
           const taskPriority = task.priority ? task.priority.toString() : 'Medium';
           const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
+          
+          // CRITICAL SYSTEM FIX: Map 'backendRowIndex' to support your backend routing configurations
+          let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
 
           const rowHtml = `
             <tr ${rowStyle}>
@@ -335,10 +342,10 @@
               </td>
               <td>${task.category || 'N/A'}</td>
               <td><span class="priority-badge ${priorityClass}">${taskPriority}</span></td>
-              <td><strong>${task.due_date || 'N/A'}</strong></td>
+              <td><strong>${cleanDateStr || 'N/A'}</strong></td>
               <td><code>${task.owner || 'Unassigned'}</code></td>
               <td>
-                <button class="action-btn clear-btn" onclick="archiveTaskRow(${task.backend_row_index}, '${escapeHtml(task.action || '')}')">
+                <button class="action-btn clear-btn" onclick="archiveTaskRow(${activeRowIndex})">
                   Complete
                 </button>
               </td>
@@ -347,23 +354,23 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#9b2c2c; padding:2rem;">Error reading from active registry backend rows.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#9b2c2c; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
       }
     }
 
-    async function archiveTaskRow(backendRowIndex, actionText) {
+    async function archiveTaskRow(backendRowIndex) {
       try {
         const res = await fetch('/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ backend_row_index: backendRowIndex })
+          body: JSON.stringify({ backend_row_index: parseInt(backendRowIndex) })
         });
         
         if (res.ok) {
           alertBox(feedFlash, '✓ Row cleared from project registry and moved to Finished bin!', 'success');
           loadActiveTasksRegistry();
         } else {
-          alertBox(feedFlash, 'Execution rejected or blocked by backend environment pipeline.', 'error');
+          alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
         }
       } catch {
         alertBox(feedFlash, 'Could not reach server pipeline layer.', 'error');
@@ -389,10 +396,10 @@
           customSheetInput.removeAttribute('required');
           loadActiveTasksRegistry(); 
         } else {
-          alertBox(formFlash, 'Ingestion failure inside local tracking workspace arrays.', 'error');
+          alertBox(formFlash, 'Ingestion failure inside tracking database arrangement matrix structures.', 'error');
         }
       } catch {
-        alertBox(formFlash, 'Server connection network request submission dropped.', 'error');
+        alertBox(formFlash, 'Server request connection pipeline drops.', 'error');
       }
     });
 
