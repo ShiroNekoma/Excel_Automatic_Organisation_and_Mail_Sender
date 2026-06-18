@@ -8,422 +8,204 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue-deep:   #1a3a5c;
-      --blue-mid:    #2563a8;
-      --blue-light:  #f0f4f8;
-      --yellow:      #f5c842;
-      --yellow-soft: #fdf3c0;
-      --white:       #ffffff;
+      --blue-deep: #1a3a5c;
+      --blue-mid: #2563a8;
+      --blue-light: #f0f4f8;
+      --white: #ffffff;
       --gray-border: #e2e8f0;
-      --radius:      12px;
+      --radius: 12px;
     }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--blue-light);
-      min-height: 100vh;
-      padding: 1.5rem;
-    }
-
-    /* Split Dashboard Frame Container */
-    .dashboard-container {
-      display: grid;
-      grid-template-columns: 1fr 1.1fr; 
-      gap: 1.5rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: var(--white);
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(26, 58, 92, 0.06);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-header {
-      background: var(--blue-deep);
-      padding: 1.5rem;
-      position: relative;
-    }
-    .card-header::after {
-      content: ''; display: block; height: 4px; background: var(--yellow);
-      position: absolute; bottom: 0; left: 0; right: 0;
-    }
-    .card-header h1 {
-      font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--white);
-    }
-    .card-header p { margin-top: .3rem; font-size: .85rem; color: #93b8d8; }
-
-    .card-body { padding: 1.5rem; flex: 1; }
-
-    /* Form Layout Elements */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .full-width { grid-column: span 2; }
-    label {
-      display: block; font-size: .75rem; font-weight: 700;
-      text-transform: uppercase; color: var(--blue-deep); margin-bottom: .4rem;
-    }
-    input, select, textarea {
-      width: 100%; padding: .6rem .8rem; border: 1.5px solid var(--gray-border);
-      border-radius: var(--radius); font-size: .88rem; outline: none; background: #fff;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(37, 99, 168, .1);
-    }
-    input:readonly { background-color: #f8fafc; color: #64748b; cursor: not-allowed; }
-    textarea { min-height: 80px; resize: vertical; }
-    .conditional-field { display: none; margin-top: .6rem; }
-
-    .btn-submit {
-      width: 100%; padding: .85rem; margin-top: 1rem; background: var(--blue-mid);
-      color: #fff; font-weight: 600; border: none; border-radius: var(--radius);
-      cursor: pointer; transition: background .15s;
-    }
-    .btn-submit:hover { background: var(--blue-deep); }
-
-    /* Live Feed Feed Layout elements (Right Side) */
-    .task-feed {
-      max-height: 720px; overflow-y: auto; padding-right: .25rem;
-    }
-    .task-item {
-      background: #f8fafc; border: 1px solid var(--gray-border);
-      border-radius: var(--radius); padding: 1rem; margin-bottom: 0.8rem;
-      display: flex; align-items: center; justify-content: space-between;
-      transition: transform .1s, border-color .2s, background-color .2s;
-    }
-    .task-item:hover { border-color: #cbd5e1; }
-    
-    /* Overdue Modification Class Injection Highlight Styling */
-    .task-item.overdue-warning {
-      background-color: var(--yellow-soft);
-      border-color: #f59e0b;
-    }
-    .task-item.overdue-warning:hover {
-      border-color: #d97706;
-    }
-    
-    .task-details { max-width: 75%; }
-    .task-desc { font-weight: 600; color: #1e293b; font-size: .95rem; margin-bottom: .2rem; }
-    .task-meta { font-size: .78rem; color: #64748b; line-height: 1.4; }
-    .badge {
-      display: inline-block; padding: .1rem .4rem; font-size: .7rem;
-      font-weight: 700; border-radius: 4px; text-transform: uppercase; margin-right: .3rem;
-    }
-    .badge.high { background: #fee2e2; color: #991b1b; }
-    .badge.medium { background: #fef3c7; color: #92400e; }
-    .badge.low { background: #e0f2fe; color: #0369a1; }
-    .badge.tab { background: #e2e8f0; color: #334155; }
-    .badge.overdue-flag { background: #dc2626; color: #ffffff; animation: pulse 2s infinite; }
-
-    .btn-complete {
-      background: #10b981; color: #fff; font-size: .82rem; font-weight: 600;
-      padding: .5rem .8rem; border: none; border-radius: 8px; cursor: pointer;
-      display: inline-flex; align-items: center; gap: .3rem; transition: background .15s;
-    }
-    .btn-complete:hover { background: #059669; }
-    .empty-state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: .9rem; }
-
-    .flash {
-      display: none; padding: .75rem; border-radius: var(--radius);
-      font-size: .85rem; font-weight: 500; margin-bottom: 1rem;
-    }
-    .flash.success { background: var(--yellow-soft); color: #7a5e00; border: 1px solid var(--yellow); }
-    .flash.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    /* ── MOBILE MEDIA QUERIES FOR FIXED BUGGY RENDERING ────────────────────── */
-    @media (max-width: 768px) {
-      body {
-        padding: 0.5rem;
-      }
-
-      .dashboard-container {
-        grid-template-columns: 1fr; /* Stack panels vertically */
-        gap: 1rem;
-      }
-
-      .card-header {
-        padding: 1rem;
-      }
-
-      .card-body {
-        padding: 1rem;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr; /* Inputs go full width on phone */
-        gap: 0.8rem;
-      }
-
-      .full-width {
-        grid-column: span 1;
-      }
-
-      .task-item {
-        flex-direction: column; /* Stack details text and complete button */
-        align-items: flex-start;
-        gap: 0.8rem;
-      }
-
-      .task-details {
-        max-width: 100%;
-      }
-
-      .btn-complete {
-        width: 100%; /* Wider hit target for touch screens */
-        justify-content: center;
-        padding: 0.65rem;
-      }
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--blue-light); min-height: 100vh; padding: 1.5rem; }
+    .dashboard-container { display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 1400px; margin: 0 auto; }
+    @media (min-width: 1024px) { .dashboard-container { grid-template-columns: 450px 1fr; } }
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 2rem; border: 1px solid var(--gray-border); }
+    .header-branding { grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; background: var(--blue-deep); padding: 1.5rem 2rem; border-radius: var(--radius); color: var(--white); }
+    .header-branding h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; }
+    h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--blue-deep); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem; text-transform: uppercase; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--gray-border); border-radius: 8px; background: #f8fafc; }
+    button[type="submit"] { width: 100%; background: var(--blue-mid); color: var(--white); border: none; padding: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; }
+    .alert-box { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; display: none; }
+    .alert-success { background: #bbf7d0; color: #15803d; }
+    .alert-error { background: #fee2e2; color: #b91c1c; }
+    .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid var(--gray-border); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th { background: #f8fafc; padding: 1rem; font-weight: 600; color: #475569; border-bottom: 2px solid var(--gray-border); }
+    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: #334155; }
+    .pill { padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .pill-high { background: #fee2e2; color: #991b1b; }
+    .pill-medium { background: #fef3c7; color: #92400e; }
+    .pill-low { background: #e0f2fe; color: #075985; }
+    .btn-complete { background: #f1f5f9; border: 1px solid var(--gray-border); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; }
+    .btn-complete:hover { background: #dcfce7; color: #166534; }
   </style>
 </head>
 <body>
 
-<div class="dashboard-container">
-  
-  <div class="card">
-    <div class="card-header">
-      <h1>Log Action Item</h1>
-      <p>Log a project (Please log as many spaces as you can to avoid bugs - Ghassane)</p>
+  <div class="dashboard-container">
+    <div class="header-branding">
+      <h1>Automatica</h1>
+      <p>Global Affairs Pipeline & Operations Tracking Infrastructure</p>
     </div>
-    <div class="card-body">
-      <div class="flash" id="formFlash"></div>
-      <form id="trackerForm">
-        <div class="form-grid">
-          
-          <div class="field full-width" style="background: #f8fafc; padding: .8rem; border-radius: var(--radius); border: 1.5px dashed #cbd5e1;">
-            <label for="sheet_select">Excel Sheet Destination</label>
-            <select id="sheet_select" name="sheet_select" required>
-                <option value="" disabled selected>Choose Sheet destination...</option>
-                <option value="INST_MAROC">INST_MAROC</option>
-                <option value="MTEDD">MTEDD</option>
-                <option value="AMCI">AMCI</option>
-                <option value="MAECA">MAECA</option>
-                <option value="DFI_GENERAL">DFI_GENERAL</option>
-                <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
-                <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
-                <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
-                <option value="Other">Other (Create New Tab...)</option>
-            </select>
-            <div class="conditional-field" id="custom_sheet_box">
-              <label for="custom_sheet">Specify Custom Sheet Title</label>
-              <input type="text" id="custom_sheet" name="custom_sheet" placeholder="Type name for new tab..." />
-            </div>
-          </div>
 
-          <div class="field">
-            <label for="project">Project (Initiative)</label>
-            <input type="text" id="project" name="project" required />
-          </div>
-          <div class="field">
-            <label for="institution">Institution</label>
-            <input type="text" id="institution" name="institution" required />
-          </div>
-          <div class="field">
-            <label for="contacts">Key Contacts</label>
-            <input type="text" id="contacts" name="contacts" required />
-          </div>
-          <div class="field">
-            <label for="owner">Owner</label>
-            <input type="text" id="owner" name="owner" placeholder="e.g. Malik, Salma ..." required />
-          </div>
-          <div class="field">
-            <label for="category">Category</label>
-            <select id="category" name="category" required>
-              <option value="Courrier">Courrier</option>
-              <option value="Coordination">Coordination</option>
-              <option value="Mission">Mission</option>
-              <option value="Meeting">Meeting</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="priority">Priority</label>
-            <select id="priority" name="priority" required>
-              <option value="Low">Low</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="High">High</option>
-              <option value="Critical">Critical</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="request_date">Request Date</label>
-            <input type="text" id="request_date" name="request_date" readonly />
-          </div>
-          <div class="field">
-            <label for="due_date">Due Date</label>
-            <input type="date" id="due_date" name="due_date" required />
-          </div>
-          <div class="field full-width">
-            <label for="action">Action (Short Description)</label>
-            <input type="text" id="action" name="action" required />
-          </div>
-          <div class="field full-width">
-            <label for="notes">Notes / Email Body Text</label>
-            <textarea id="notes" name="notes"></textarea>
-          </div>
+    <div class="card">
+      <h2>Log Action Item</h2>
+      <div id="formFlash" class="alert-box"></div>
+
+      <form id="taskForm">
+        <div class="form-group"><label>Project</label><input type="text" name="project" required /></div>
+        <div class="form-group"><label>Institution</label><input type="text" name="institution" required /></div>
+        <div class="form-group"><label>Contacts</label><input type="text" name="contacts" required /></div>
+        <div class="form-group"><label>Action</label><input type="text" name="action" required /></div>
+        
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" required>
+            <option value="Meeting">Meeting</option>
+            <option value="Report Submission">Report Submission</option>
+            <option value="Technical Review">Technical Review</option>
+            <option value="Follow-up">Follow-up</option>
+          </select>
         </div>
-        <button type="submit" class="btn-submit">Add New Row Task →</button>
+
+        <div class="form-group">
+          <label>Priority</label>
+          <select name="priority" required>
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+        <div class="form-group"><label>Due Date</label><input type="date" name="dueDate" required /></div>
+        <div class="form-group"><label>Owner</label><input type="text" name="owner" required /></div>
+        
+        <div class="form-group">
+          <label>Target Sheet</label>
+          <select id="targetSheet" name="targetSheet" required>
+            <option value="BackEnd" selected>Central Master Ledger (BackEnd)</option>
+            <option value="Custom">Route to Custom Team Tab...</option>
+          </select>
+        </div>
+
+        <div id="customSheetBox" style="display: none;" class="form-group">
+          <label>Custom Sheet Name</label>
+          <input type="text" id="customSheetInput" name="customSheetInput" />
+        </div>
+
+        <div class="form-group"><label>Notes</label><textarea name="comments"></textarea></div>
+        <input type="hidden" id="requestDate" name="requestDate" />
+
+        <button type="submit">Deploy Record to Pipeline</button>
       </form>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-header" style="background: #0f172a;">
-      <h1>To Do List</h1>
-      <p>Click on complete to remove it from active sheets and move it directly to the Finished bin.</p>
-    </div>
-    <div class="card-body" style="background: #fafafa;">
-      <div class="flash" id="feedFlash"></div>
-      <div class="task-feed" id="taskFeedContainer">
-        <div class="empty-state">Loading records from spreadsheet BackEnd ledger...</div>
-      </div>
+    <div class="card">
+      <h2>Active Cloud Queue</h2>
+      <div id="feedFlash" class="alert-box"></div>
+      <div id="registryWrapper"></div>
     </div>
   </div>
 
-</div>
+  <script>
+    const form = document.getElementById('taskForm');
+    const targetSheet = document.getElementById('targetSheet');
+    const customSheetBox = document.getElementById('customSheetBox');
+    const customSheetInput = document.getElementById('customSheetInput');
+    const registryWrapper = document.getElementById('registryWrapper');
 
-<script>
-  const form = document.getElementById('trackerForm');
-  const formFlash = document.getElementById('formFlash');
-  const feedFlash = document.getElementById('feedFlash');
-  const feedContainer = document.getElementById('taskFeedContainer');
-  const sheetSelect = document.getElementById('sheet_select');
-  const customSheetBox = document.getElementById('custom_sheet_box');
-  const customSheetInput = document.getElementById('custom_sheet');
-  const reqDateInput = document.getElementById('request_date');
+    const today = new Date();
+    document.getElementById('requestDate').value = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
 
-  // Load Request Date Today
-  const todayStr = new Date().toISOString().split('T')[0];
-  reqDateInput.value = todayStr;
-  const todayDateObj = new Date(todayStr + "T00:00:00");
-
-  // Toggle Custom Sheet Dropdown Box handler
-  sheetSelect.addEventListener('change', function() {
-    if (this.value === 'Other') {
-      customSheetBox.style.display = 'block';
-      customSheetInput.setAttribute('required', 'true');
-    } else {
-      customSheetBox.style.display = 'none';
-      customSheetInput.removeAttribute('required');
-      customSheetInput.value = '';
-    }
-  });
-
-  function alertBox(element, message, type) {
-    element.textContent = message;
-    element.className = `flash ${type}`;
-    element.style.display = 'block';
-    setTimeout(() => { element.style.display = 'none'; }, 5000);
-  }
-
-  // Fetch tracking data entries directly out of BackEnd sheet layout matrix
-  async function loadActiveTasksRegistry() {
-    try {
-      const res = await fetch('/tasks');
-      const tasks = await res.json() || [];
-      
-      if (tasks.length === 0) {
-        feedContainer.innerHTML = `<div class="empty-state">✓ All clear! No active tracking rows inside central BackEnd matrix repository.</div>`;
-        return;
-      }
-
-      feedContainer.innerHTML = '';
-      tasks.forEach(task => {
-        const item = document.createElement('div');
-        item.className = 'task-item';
-        
-        // Evaluate dynamic overdue state conditions
-        let isOverdue = false;
-        let overdueBadgeHtml = '';
-        if (task.due_date && task.due_date !== 'N/A') {
-          const taskDueDateObj = new Date(task.due_date + "T00:00:00");
-          if (taskDueDateObj < todayDateObj) {
-            isOverdue = true;
-            item.classList.add('overdue-warning');
-            overdueBadgeHtml = `<span class="badge overdue-flag">Overdue</span>`;
-          }
-        }
-        
-        const priorityClass = ['high', 'critical'].includes(task.priority.toLowerCase()) ? 'high' : (task.priority.toLowerCase() === 'low' ? 'low' : 'medium');
-
-        item.innerHTML = `
-          <div class="task-details">
-            <div class="task-desc">${task.action}</div>
-            <div class="task-meta">
-              <span class="badge tab">Sheet: ${task.sheet}</span>
-              <span class="badge ${priorityClass}">${task.priority}</span>
-              ${overdueBadgeHtml}
-              <br/>
-              <strong>Project:</strong> ${task.project} | <strong>Owner:</strong> ${task.owner} | <strong>Due:</strong> ${task.due_date}
-            </div>
-          </div>
-          <div>
-            <button class="btn-complete" onclick="markTaskArchived(${task.backend_row_index})">Complete</button>
-          </div>
-        `;
-        feedContainer.appendChild(item);
-      });
-    } catch (err) {
-      console.error(err);
-      feedContainer.innerHTML = `<div class="empty-state" style="color: #ef4444;">Error reading from BackEnd matrix layer.</div>`;
-    }
-  }
-
-  // Action: Archive item row execution straight to Finished
-  async function markTaskArchived(backendRowIndex) {
-    try {
-      const res = await fetch('/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ backend_row_index: backendRowIndex })
-      });
-      const json = await res.json();
-      
-      if (res.ok) {
-        alertBox(feedFlash, '✓ Row cleared from project registry and moved to Finished bin!', 'success');
-        loadActiveTasksRegistry();
+    targetSheet.addEventListener('change', (e) => {
+      if (e.target.value === 'Custom') {
+        customSheetBox.style.display = 'block';
+        customSheetInput.setAttribute('required', 'true');
       } else {
-        alertBox(feedFlash, json.error || 'Execution blocked.', 'error');
-      }
-    } catch {
-      alertBox(feedFlash, 'Could not reach server pipeline layer.');
-    }
-  }
-
-  // Action: Submit Form Ingestion
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
-
-    try {
-      const res = await fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const json = await res.json();
-
-      if (res.ok) {
-        alertBox(formFlash, '✓ Successfully saved to your selected target sheet arrangement and BackEnd ledger!', 'success');
-        form.reset();
-        reqDateInput.value = todayStr;
         customSheetBox.style.display = 'none';
         customSheetInput.removeAttribute('required');
-        loadActiveTasksRegistry(); 
-      } else {
-        alertBox(formFlash, json.error || 'Ingestion failure.', 'error');
       }
-    } catch {
-      alertBox(formFlash, 'Network layer error trying to append data points.');
+    });
+
+    function showAlert(el, msg, type) {
+      el.className = `alert-box alert-${type}`;
+      el.innerText = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 5000);
     }
-  });
 
-  // Startup Init load sequence
-  loadActiveTasksRegistry();
-</script>
+    // FIXED: Correctly fetches tasks from the aligned /get_tasks route
+    async function loadTasks() {
+      try {
+        const res = await fetch('/get_tasks');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const pending = data.NEW_TASK || [];
 
+        if (pending.length === 0) {
+          registryWrapper.innerHTML = '<p style="color:#64748b;text-align:center;padding:2rem;">Cloud storage queue is empty. Sync completed.</p>';
+          return;
+        }
+
+        let html = '<div class="table-container"><table><thead><tr><th>Action</th><th>Tab</th><th>Owner</th><th>Due Date</th><th>Priority</th><th>Action</th></tr></thead><tbody>';
+        pending.forEach((t, i) => {
+          html += `<tr>
+            <td><strong>${escapeHtml(t.action)}</strong><br><small>${escapeHtml(t.project)}</small></td>
+            <td><code>${escapeHtml(t.target_sheet)}</code></td>
+            <td>${escapeHtml(t.owner)}</td>
+            <td>${escapeHtml(t.due_date)}</td>
+            <td><span class="pill pill-${t.priority.toLowerCase()}">${t.priority}</span></td>
+            <td><button class="btn-complete" onclick="archiveTask('${escapeHtml(t.action)}', ${i})">Complete</button></td>
+          </tr>`;
+        });
+        registryWrapper.innerHTML = html + '</tbody></table></div>';
+      } catch {
+        registryWrapper.innerHTML = '<p style="color:#b91c1c;text-align:center;">Error reading from BackEnd matrix layer.</p>';
+      }
+    }
+
+    async function archiveTask(action, idx) {
+      try {
+        const res = await fetch('/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: action, backend_row_index: idx })
+        });
+        if (res.ok) {
+          showAlert(document.getElementById('feedFlash'), 'Completion logged to sync queue!', 'success');
+          loadTasks();
+        }
+      } catch {
+        showAlert(document.getElementById('feedFlash'), 'Error sending completion signal.', 'error');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      if (data.targetSheet === 'Custom') data.targetSheet = data.customSheetInput;
+
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          showAlert(document.getElementById('formFlash'), 'Task deployed to cloud queue!', 'success');
+          form.reset();
+          loadTasks();
+        }
+      } catch {
+        showAlert(document.getElementById('formFlash'), 'Network deployment link error.', 'error');
+      }
+    });
+
+    function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ''; }
+    loadTasks();
+    setInterval(loadTasks, 15000);
+  </script>
 </body>
 </html>

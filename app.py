@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__, template_folder='.')
 
-# Internal memory storage queues to hold tasks until your PC grabs them
+# Internal memory storage queues to hold tasks until your PC script logs them
 DATA_QUEUES = {
     "NEW_TASK": [],
     "COMPLETE_TASK": []
@@ -17,10 +17,8 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        # Accept JSON payload from your updated Automatica.html script
         form_data = request.get_json() if request.is_json else request.form.to_dict()
         
-        # Clean up and format the due date
         due_date = form_data.get('dueDate', '')
         if due_date and '-' in due_date:
             due_date = datetime.strptime(due_date, '%Y-%m-%d').strftime('%d/%m/%Y')
@@ -38,11 +36,11 @@ def submit():
             "request_date": req_date,
             "owner": form_data.get('owner', ''),
             "notes": form_data.get('comments', ''),
-            "target_sheet": form_data.get('targetSheet', '')
+            "target_sheet": form_data.get('targetSheet', 'BackEnd')
         }
         
         DATA_QUEUES["NEW_TASK"].append(task_payload)
-        return jsonify({"status": "success", "message": "Task queued successfully!"})
+        return jsonify({"status": "success", "message": "Task successfully queued!"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -57,21 +55,21 @@ def complete():
         }
         
         DATA_QUEUES["COMPLETE_TASK"].append(closure_payload)
-        return jsonify({"status": "success", "message": "Task completion queued!"})
+        return jsonify({"status": "success", "message": "Archival request queued!"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Secure Endpoint for your PC script to grab data via standard web browsing traffic (Port 443)
+# Fixes the frontend data table routing queries
+@app.route('/get_tasks', methods=['GET'])
 @app.route('/sync-pull', methods=['GET'])
 def sync_pull():
     return jsonify(DATA_QUEUES)
 
-# Secure Endpoint for your PC script to clear the cloud memory once saved to Excel
 @app.route('/sync-clear', methods=['POST'])
 def sync_clear():
     global DATA_QUEUES
     DATA_QUEUES = {"NEW_TASK": [], "COMPLETE_TASK": []}
-    return jsonify({"status": "success", "message": "Cloud queue flushed."})
+    return jsonify({"status": "success", "message": "Cloud queue flushed cleanly."})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
