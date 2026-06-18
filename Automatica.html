@@ -4,270 +4,350 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Global Affairs Tracker Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     :root {
-      --slate-deep:   #1e293b; 
-      --slate-mid:    #475569;  
-      --slate-light:  #f8fafc;  
-      --navy-blue:    #0f172a;  
-      --accent-blue:  #2563eb;  
-      --overdue-bg:   #e0f2fe;  /* Corporate light blue highlight for overdue rows */
-      --overdue-text: #0369a1;  /* Dark blue text color for overdue alerts */
+      --navy:         #0B1F3D;
+      --navy-soft:    #14294b;
+      --blue:         #1D4ED8;
+      --blue-dark:    #1640ad;
+      --blue-pale:    #EEF3FC;
+      --blue-100:     #DCE6FA;
+      --gold:         #D4A72C;
+      --gold-light:   #F1DDA0;
+      --amber-bg:     #FEF3C7;  /* overdue row background */
+      --amber-text:   #92400E;  /* overdue row text */
+      --amber-strong: #B45309;  /* overdue badge */
+      --slate:        #475569;
+      --slate-deep:   #1e293b;
+      --border:       #d7e1f0;
       --white:        #ffffff;
-      --gray-border:  #cbd5e1;
-      --radius:       8px;
+      --danger-bg:    #fef2f2;
+      --danger-text:  #991b1b;
+      --danger-border:#fca5a5;
+      --radius:       12px;
+      --radius-sm:    8px;
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: var(--slate-light);
+      background: linear-gradient(180deg, #eef3fb 0%, #f6f8fc 55%, #f8fafc 100%);
       min-height: 100vh;
-      padding: 2rem;
+      padding: 1.5rem;
       color: var(--slate-deep);
     }
 
-    /* Stacked Layout: Form on top, List on bottom */
-    .dashboard-container {
+    .page-shell { max-width: 1400px; margin: 0 auto; }
+
+    /* Header bar: brand mark + segmented tab control */
+    .app-header {
       display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      background: var(--navy);
+      padding: 1.1rem 1.75rem;
+      border-radius: var(--radius);
+      border-bottom: 3px solid var(--gold);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 30px -16px rgba(11,31,61,0.55);
     }
+
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-emblem { flex-shrink: 0; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .brand-title { color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.2px; }
+    .brand-sub { color: var(--gold-light); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 0.15rem; }
+
+    .tab-nav { display: flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; padding: 0.3rem; gap: 0.25rem; }
+    .tab-btn {
+      border: none; background: transparent; color: #c7d4ea;
+      padding: 0.6rem 1.15rem; border-radius: 999px;
+      font-family: inherit; font-weight: 700; font-size: 0.74rem;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+      transition: background 0.18s ease, color 0.18s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active { background: var(--gold); color: var(--navy); }
+    .tab-btn:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+    .tab-count {
+      background: rgba(255,255,255,0.18); color: #fff;
+      font-size: 0.68rem; font-weight: 700; min-width: 1.25rem; text-align: center;
+      padding: 0.05rem 0.4rem; border-radius: 999px;
+    }
+    .tab-btn.active .tab-count { background: var(--navy); color: var(--gold-light); }
+
+    .tab-panel { display: none; animation: fadeIn 0.18s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     .glass-card {
       background: var(--white);
       border-radius: var(--radius);
-      border: 1px solid var(--gray-border);
+      border: 1px solid var(--border);
       padding: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      height: fit-content;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 28px -18px rgba(15,23,42,0.18);
     }
 
-    h2 {
-      color: var(--navy-blue);
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid var(--gray-border);
-      padding-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .card-header-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.75rem;
+      margin-bottom: 1.5rem; border-bottom: 3px solid var(--gold-light); padding-bottom: 0.65rem;
     }
 
-    .flash-container {
-      margin-bottom: 1rem;
-      min-height: 40px;
-    }
-    .alert {
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      font-size: 0.9rem;
-      font-weight: 500;
-      display: none;
-    }
-    .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-    .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    h2 { color: var(--navy); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* Form Fields (Layout structure completely untouched for submission accuracy) */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.2rem;
-    }
+    .legend { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 600; color: var(--slate); text-transform: none; letter-spacing: 0; }
+    .legend-swatch { width: 0.7rem; height: 0.7rem; border-radius: 3px; background: var(--amber-bg); border: 1px solid var(--amber-strong); display: inline-block; }
+
+    .flash-container { margin-bottom: 1rem; min-height: 0; }
+    .alert { padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; display: none; }
+    .alert-success { background: var(--blue-pale); color: var(--blue-dark); border: 1px solid var(--blue-100); }
+    .alert-error { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+
+    /* Form fields */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
     .form-group { margin-bottom: 0.2rem; }
     .form-group.full-width { grid-column: 1 / -1; }
-    
-    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--slate-mid); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    label { display: block; font-size: 0.76rem; font-weight: 700; color: var(--slate); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid var(--gray-border);
-      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       font-family: inherit;
       font-size: 0.95rem;
       color: var(--slate-deep);
       background: var(--white);
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.12); }
-    input[readonly] { background-color: #e2e8f0; color: var(--slate-mid); cursor: not-allowed; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,0.14); }
+    input[readonly] { background-color: #eef2f8; color: var(--slate); cursor: not-allowed; }
 
     .submit-btn {
       grid-column: 1 / -1;
       width: 100%;
-      background: var(--navy-blue);
+      background: var(--blue);
       color: var(--white);
       border: none;
       padding: 1rem;
-      border-radius: var(--radius);
-      font-weight: 600;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
       font-size: 1rem;
+      letter-spacing: 0.3px;
       cursor: pointer;
       margin-top: 0.5rem;
       transition: background 0.2s;
     }
-    .submit-btn:hover { background: var(--accent-blue); }
+    .submit-btn:hover { background: var(--blue-dark); }
+    .submit-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-    /* Ultra-Clean 4-Column Table Grid Layout */
-    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius); border: 1px solid var(--gray-border); }
+    /* To Do table */
+    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
-    
-    th:nth-child(1), td:nth-child(1) { width: 55%; } /* Task Name & Overdue Tag */
-    th:nth-child(2), td:nth-child(2) { width: 15%; } /* Due Date Tag */
-    th:nth-child(3), td:nth-child(3) { width: 15%; } /* Owner Allocations */
-    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Complete Button Trigger */
 
-    th { background: var(--navy-blue); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
-    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--slate-mid); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
-    
+    th:nth-child(1), td:nth-child(1) { width: 50%; }
+    th:nth-child(2), td:nth-child(2) { width: 17%; }
+    th:nth-child(3), td:nth-child(3) { width: 15%; }
+    th:nth-child(4), td:nth-child(4) { width: 18%; }
+
+    th { background: var(--navy); color: var(--white); padding: 1rem; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; }
+    td { padding: 1rem; border-bottom: 1px solid var(--border); color: var(--slate); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
+
     tr { background-color: var(--white); }
-    tr:hover { background-color: var(--slate-light); }
+    tr:hover { background-color: var(--blue-pale); }
 
-    /* Overdue Theming Rules */
-    tr.task-overdue { background-color: var(--overdue-bg) !important; }
-    tr.task-overdue td { color: var(--overdue-text); }
-    tr.task-overdue strong { color: var(--navy-blue); }
+    /* Overdue rows turn yellow instead of the default row color */
+    tr.task-overdue { background-color: var(--amber-bg) !important; }
+    tr.task-overdue td { color: var(--amber-text); }
+    tr.task-overdue strong { color: var(--navy); }
+    tr.task-overdue:hover { background-color: #fdecb0 !important; }
 
     .badge-overdue {
-      background-color: var(--overdue-text);
+      background-color: var(--amber-strong);
       color: var(--white);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      padding: 0.15rem 0.4rem;
+      padding: 0.18rem 0.45rem;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-top: 0.3rem;
+      letter-spacing: 0.4px;
+      margin-top: 0.35rem;
       display: inline-block;
     }
 
     .date-tag {
-      background: #e2e8f0;
-      color: var(--slate-deep);
-      padding: 0.25rem 0.5rem;
+      background: var(--blue-100);
+      color: var(--navy);
+      padding: 0.25rem 0.55rem;
       border-radius: 4px;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       display: inline-block;
     }
-    tr.task-overdue .date-tag {
-      background: rgba(3, 105, 161, 0.15);
-      color: var(--overdue-text);
-    }
+    tr.task-overdue .date-tag { background: var(--gold-light); color: var(--amber-text); }
 
-    .action-btn { padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; transition: all 0.15s; }
-    .clear-btn { background: var(--slate-light); border: 1px solid var(--gray-border); color: var(--slate-deep); }
-    .clear-btn:hover { background: #b91c1c; border-color: #b91c1c; color: var(--white); }
+    .action-btn { padding: 0.55rem 0.75rem; border-radius: 6px; font-weight: 700; font-size: 0.78rem; cursor: pointer; border: 1px solid var(--blue); width: 100%; text-align: center; transition: all 0.15s; background: var(--white); color: var(--blue); }
+    .clear-btn:hover { background: var(--blue); color: var(--white); }
+    .action-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    .empty-state, .error-state { text-align: center; padding: 2.5rem 1rem; color: var(--slate); }
+    .error-state { color: var(--danger-text); }
+
+    @media (max-width: 640px) {
+      .app-header { padding: 1rem; }
+      .tab-nav { width: 100%; justify-content: stretch; }
+      .tab-btn { flex: 1; justify-content: center; }
+      .glass-card { padding: 1.25rem; }
+      .card-header-row { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="dashboard-container">
-    
-    <div class="glass-card">
-      <h2>Add New Action</h2>
-      <div class="flash-container"><div id="formFlash" class="alert"></div></div>
-      
-      <form id="taskForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Target Sheet Tab Routing</label>
-            <select id="sheetSelector" name="sheet_select" required>
-              <option value="" disabled selected>Choose Sheet destination...</option>
-              <option value="INST_MAROC">INST_MAROC</option>
-              <option value="MTEDD">MTEDD</option>
-              <option value="AMCI">AMCI</option>
-              <option value="MAECA">MAECA</option>
-              <option value="DFI_GENERAL">DFI_GENERAL</option>
-              <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
-              <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
-              <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
-              <option value="Other">Other (Create New Tab...)</option>
-            </select>
-          </div>
-          <div class="form-group" id="customSheetContainer" style="display: none;">
-            <label>Custom Tab Sheet Name</label>
-            <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
-          </div>
-          <div class="form-group">
-            <label>Project / Initiative</label>
-            <input type="text" name="project" required placeholder="Project Name" />
-          </div>
-          <div class="form-group">
-            <label>Institution</label>
-            <input type="text" name="institution" required placeholder="Target Institution Name" />
-          </div>
-          <div class="form-group">
-            <label>Key Contacts</label>
-            <input type="text" name="contacts" required placeholder="Contact string details" />
-          </div>
-          <div class="form-group">
-            <label>Owner Allocation</label>
-            <input type="text" name="owner" required placeholder="e.g. Malik, Salma ..." />
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select name="category" required>
-              <option value="Courrier">Courrier</option>
-              <option value="Coordination">Coordination</option>
-              <option value="Mission">Mission</option>
-              <option value="Meeting">Meeting</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Priority</label>
-            <select name="priority" required>
-              <option value="Low">Low</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="High">High</option>
-              <option value="Critical">Critical</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Due Date</label>
-            <input type="date" name="due_date" required />
-          </div>
-          <div class="form-group">
-            <label>Request Date</label>
-            <input type="text" id="requestDate" name="request_date" readonly />
-          </div>
-          <div class="form-group full-width">
-            <label>Action / Description</label>
-            <input type="text" name="action" required placeholder="Short operational task description..." />
-          </div>
-          <div class="form-group full-width">
-            <label>Notes / Email Body Text</label>
-            <textarea name="notes" rows="3" placeholder="Optional background context..."></textarea>
-          </div>
-          <button type="submit" class="submit-btn">Add New Row Task →</button>
+  <div class="page-shell">
+
+    <header class="app-header">
+      <div class="brand">
+        <svg class="brand-emblem" width="36" height="36" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="var(--gold)" stroke-width="2"/>
+          <path d="M20 5 L23.5 16.5 L35 20 L23.5 23.5 L20 35 L16.5 23.5 L5 20 L16.5 16.5 Z" fill="var(--gold)"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-title">Global Affairs Tracker</span>
+          <span class="brand-sub">Task &amp; Coordination Pipeline</span>
         </div>
-      </form>
-    </div>
-
-    <div class="glass-card">
-      <h2>TO DO LIST</h2>
-      <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
-      
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Task</th>
-              <th>Due Date</th>
-              <th>Owner</th>
-              <th>Operation</th>
-            </tr>
-          </thead>
-          <tbody id="taskTableBody">
-            <tr><td colspan="4" style="text-align:center; padding:2rem;">Connecting with live operational data matrices...</td></tr>
-          </tbody>
-        </table>
       </div>
-    </div>
 
+      <nav class="tab-nav" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="create" role="tab" aria-selected="true">
+          Create Task
+        </button>
+        <button type="button" class="tab-btn" data-tab="todo" role="tab" aria-selected="false">
+          To Do List <span class="tab-count" id="todoCount">0</span>
+        </button>
+      </nav>
+    </header>
+
+    <main class="dashboard-container">
+
+      <section id="createPanel" class="tab-panel active" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Add New Action</h2>
+          </div>
+          <div class="flash-container"><div id="formFlash" class="alert"></div></div>
+
+          <form id="taskForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Target Sheet Tab Routing</label>
+                <select id="sheetSelector" name="sheet_select" required>
+                  <option value="" disabled selected>Choose Sheet destination...</option>
+                  <option value="INST_MAROC">INST_MAROC</option>
+                  <option value="MTEDD">MTEDD</option>
+                  <option value="AMCI">AMCI</option>
+                  <option value="MAECA">MAECA</option>
+                  <option value="DFI_GENERAL">DFI_GENERAL</option>
+                  <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
+                  <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
+                  <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
+                  <option value="Other">Other (Create New Tab...)</option>
+                </select>
+              </div>
+              <div class="form-group" id="customSheetContainer" style="display: none;">
+                <label>Custom Tab Sheet Name</label>
+                <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
+              </div>
+              <div class="form-group">
+                <label>Project / Initiative</label>
+                <input type="text" name="project" required placeholder="Project Name" />
+              </div>
+              <div class="form-group">
+                <label>Institution</label>
+                <input type="text" name="institution" required placeholder="Target Institution Name" />
+              </div>
+              <div class="form-group">
+                <label>Key Contacts</label>
+                <input type="text" name="contacts" required placeholder="Contact string details" />
+              </div>
+              <div class="form-group">
+                <label>Owner Allocation</label>
+                <input type="text" name="owner" required placeholder="e.g. Malik, Salma ..." />
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select name="category" required>
+                  <option value="Courrier">Courrier</option>
+                  <option value="Coordination">Coordination</option>
+                  <option value="Mission">Mission</option>
+                  <option value="Meeting">Meeting</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Priority</label>
+                <select name="priority" required>
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" name="due_date" required />
+              </div>
+              <div class="form-group">
+                <label>Request Date</label>
+                <input type="text" id="requestDate" name="request_date" readonly />
+              </div>
+              <div class="form-group full-width">
+                <label>Action / Description</label>
+                <input type="text" name="action" required placeholder="Short operational task description..." />
+              </div>
+              <div class="form-group full-width">
+                <label>Notes / Email Body Text</label>
+                <textarea name="notes" rows="3" placeholder="Optional background context..."></textarea>
+              </div>
+              <button type="submit" class="submit-btn">Add New Row Task →</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="todoPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>To Do List</h2>
+            <div class="legend"><span class="legend-swatch"></span> Overdue tasks are highlighted</div>
+          </div>
+          <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Due Date</th>
+                  <th>Owner</th>
+                  <th>Operation</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody">
+                <tr><td colspan="4" class="empty-state">Connecting with live operational data matrices...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
   </div>
 
   <script>
@@ -279,11 +359,30 @@
     const customSheetBox = document.getElementById('customSheetContainer');
     const customSheetInput = document.getElementById('customSheetInput');
     const reqDateInput = document.getElementById('requestDate');
+    const todoCountEl = document.getElementById('todoCount');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
 
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     reqDateInput.value = todayStr;
     const todayDateObj = new Date(todayStr + "T00:00:00");
+
+    // --- Tab switching: Create Task <-> To Do List ---
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+        tabPanels.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        document.getElementById(btn.dataset.tab + 'Panel').classList.add('active');
+
+        if (btn.dataset.tab === 'todo') {
+          loadActiveTasksRegistry();
+        }
+      });
+    });
 
     sheetSelector.addEventListener('change', function() {
       if (this.value === 'Other') {
@@ -303,50 +402,63 @@
       setTimeout(() => { element.style.display = 'none'; }, 5000);
     }
 
+    // Parses 'DD/MM/YYYY' or 'YYYY-MM-DD' into a Date, or null if unusable.
+    function parseTaskDate(rawValue) {
+      if (rawValue === undefined || rawValue === null) return null;
+      const cleanStr = String(rawValue).trim();
+      if (!cleanStr || ['n/a', 'none', ''].includes(cleanStr.toLowerCase())) return null;
+
+      let parsed = null;
+      if (cleanStr.includes('/')) {
+        const parts = cleanStr.split('/');
+        if (parts.length === 3) {
+          parsed = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        }
+      } else if (cleanStr.includes('-')) {
+        parsed = new Date(cleanStr + "T00:00:00");
+      }
+      return (parsed && !isNaN(parsed.getTime())) ? parsed : null;
+    }
+
     async function loadActiveTasksRegistry() {
       try {
         const res = await fetch('/tasks');
         if (!res.ok) throw new Error();
         const tasks = await res.json() || [];
-        
+
+        // Always keep the To Do list ordered by due date (soonest first; undated tasks last)
+        tasks.sort((a, b) => {
+          const da = parseTaskDate(a.dueDate || a.due_date);
+          const db = parseTaskDate(b.dueDate || b.due_date);
+          if (!da && !db) return 0;
+          if (!da) return 1;
+          if (!db) return -1;
+          return da - db;
+        });
+
+        todoCountEl.textContent = tasks.length;
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No pending items inside the To Do list configuration.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">✓ All clean! No pending items inside the To Do list configuration.</td></tr>`;
           return;
         }
 
         tasks.forEach(task => {
-          let isOverdue = false;
-          let rawDueDate = task.dueDate || task.due_date || '';
-          let cleanDateStr = String(rawDueDate).trim();
+          const rawDueDate = task.dueDate || task.due_date || '';
+          const cleanDateStr = String(rawDueDate).trim();
+          const dueDateObj = parseTaskDate(cleanDateStr);
+          const isOverdue = !!(dueDateObj && dueDateObj < todayDateObj);
 
-          if (cleanDateStr && cleanDateStr.toLowerCase() !== 'n/a' && cleanDateStr.toLowerCase() !== 'none') {
-            let taskDueDateObj;
-            if (cleanDateStr.includes('/')) {
-              const parts = cleanDateStr.split('/');
-              taskDueDateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-            } else if (cleanDateStr.includes('-')) {
-              taskDueDateObj = new Date(cleanDateStr + "T00:00:00");
-            }
-
-            if (taskDueDateObj && !isNaN(taskDueDateObj.getTime())) {
-              if (taskDueDateObj < todayDateObj) {
-                isOverdue = true;
-              }
-            }
-          }
-
-          const rowStyle = isOverdue ? 'class="task-overdue"' : '';
+          const rowClass = isOverdue ? ' class="task-overdue"' : '';
           const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue</span>` : '';
-          
-          let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
 
+          const activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
           const actionDesc = task.action || 'Untitled Task';
           const ownerName = task.owner || 'Unassigned';
 
           const rowHtml = `
-            <tr ${rowStyle}>
+            <tr${rowClass}>
               <td>
                 <strong>${actionDesc}</strong>
                 ${tagSpan}
@@ -363,7 +475,7 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#991b1b; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" class="error-state">Active registry serialization drop error logs.</td></tr>`;
       }
     }
 
@@ -378,7 +490,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ backend_row_index: parseInt(backendRowIndex) })
         });
-        
+
         if (res.ok) {
           alertBox(feedFlash, '✓ Task cleared! The automation engine script will shift this record item to the Finished Excel spreadsheet row archive.', 'success');
           loadActiveTasksRegistry();
@@ -402,12 +514,12 @@
         });
 
         if (res.ok) {
-          alertBox(formFlash, '✓ Successfully saved to your selected target sheet arrangement!', 'success');
+          alertBox(formFlash, '✓ Successfully saved to your selected target sheet arrangement! It will sync to the BackEnd sheet shortly.', 'success');
           form.reset();
           reqDateInput.value = todayStr;
           customSheetBox.style.display = 'none';
           customSheetInput.removeAttribute('required');
-          loadActiveTasksRegistry(); 
+          loadActiveTasksRegistry();
         } else {
           alertBox(formFlash, 'Ingestion failure inside tracking database.', 'error');
         }
@@ -417,6 +529,9 @@
     });
 
     loadActiveTasksRegistry();
+    // Keep the To Do list reasonably fresh even if the tab is left open,
+    // since the local Excel sync engine runs independently in the background.
+    setInterval(loadActiveTasksRegistry, 20000);
   </script>
 </body>
 </html>
