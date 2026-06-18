@@ -4,17 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Global Affairs Tracker Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&family=Syne:wght=700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
     :root {
       --blue-deep:   #1a3a5c;
       --blue-mid:    #2563a8;
       --blue-light:  #f0f4f8;
-      --yellow:      #f5c842;
       --yellow-soft: #fdf3c0;
+      --yellow-dark: #b78a02;
       --white:       #ffffff;
       --gray-border: #e2e8f0;
+      --gray-text:   #475569;
       --radius:      12px;
     }
 
@@ -22,445 +24,408 @@
       font-family: 'Inter', sans-serif;
       background: var(--blue-light);
       min-height: 100vh;
-      padding: 1.5rem;
+      padding: 2rem;
+      color: #1e293b;
     }
 
-    /* Tabs Navigation Bar Upper Segment */
-    .tabs-nav {
-      display: flex;
-      gap: 0.5rem;
-      max-width: 1400px;
-      margin: 0 auto 1rem auto;
-      border-bottom: 2px solid var(--gray-border);
-      padding-bottom: 1px;
-    }
-
-    .tab-btn {
-      background: none;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #64748b;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn:hover {
-      color: var(--blue-deep);
-    }
-
-    .tab-btn.active {
-      color: var(--blue-deep);
-    }
-
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--yellow);
-      border-radius: 2px;
-    }
-
-    /* Container Frame Structure */
+    /* Fixed Widescreen 2-Column Desktop Grid Layout */
     .dashboard-container {
-      max-width: 1400px;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 2rem;
+      max-width: 1800px;
       margin: 0 auto;
     }
 
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .card {
+    .glass-card {
       background: var(--white);
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(26, 58, 92, 0.06);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-border);
+      padding: 2.2rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      height: fit-content;
     }
 
-    .card-header {
-      background: var(--blue-deep);
-      padding: 1.5rem;
-      position: relative;
+    h2 {
+      font-family: 'Syne', sans-serif;
+      color: var(--blue-deep);
+      font-size: 1.6rem;
+      margin-bottom: 1.8rem;
+      border-bottom: 3px solid #f5c842;
+      padding-bottom: 0.6rem;
     }
-    .card-header::after {
-      content: ''; display: block; height: 4px; background: var(--yellow);
-      position: absolute; bottom: 0; left: 0; right: 0;
-    }
-    .card-header h1 {
-      font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--white);
-    }
-    .card-header p { margin-top: .3rem; font-size: .85rem; color: #93b8d8; }
 
-    .card-body { padding: 1.5rem; flex: 1; }
-
-    /* Form Layout Elements */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .full-width { grid-column: span 2; }
-    label {
-      display: block; font-size: .75rem; font-weight: 700;
-      text-transform: uppercase; color: var(--blue-deep); margin-bottom: .4rem;
+    /* Alerts and Feedback Banners */
+    .flash-container {
+      margin-bottom: 1.2rem;
+      min-height: 45px;
     }
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    .alert-success { background: #e6fffa; color: #00664f; border: 1px solid #b2f5ea; }
+    .alert-error { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Clean Input Forms Layout styling */
+    .form-group { margin-bottom: 1.2rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--blue-deep); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
-      width: 100%; padding: .6rem .8rem; border: 1.5px solid var(--gray-border);
-      border-radius: var(--radius); font-size: .88rem; outline: none; background: #fff;
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: #334155;
+      background: #f8fafc;
+      transition: all 0.15s ease;
     }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(37, 99, 168, .1);
-    }
-    input:readonly { background-color: #f8fafc; color: #64748b; cursor: not-allowed; }
-    textarea { min-height: 80px; resize: vertical; }
-    .conditional-field { display: none; margin-top: .6rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue-mid); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,168,0.12); }
+    input[readonly] { background-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
 
-    .btn-submit {
-      width: 100%; padding: .85rem; margin-top: 1rem; background: var(--blue-mid);
-      color: #fff; font-weight: 600; border: none; border-radius: var(--radius);
-      cursor: pointer; transition: background .15s;
+    .submit-btn {
+      width: 100%;
+      background: var(--blue-deep);
+      color: var(--white);
+      border: none;
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 0.5rem;
     }
-    .btn-submit:hover { background: var(--blue-deep); }
+    .submit-btn:hover { background: var(--blue-mid); }
 
-    /* Live Feed Feed Layout elements */
-    .task-feed {
-      max-height: 720px; overflow-y: auto; padding-right: .25rem;
-    }
-    .task-item {
-      background: #f8fafc; border: 1px solid var(--gray-border);
-      border-radius: var(--radius); padding: 1rem; margin-bottom: 0.8rem;
-      display: flex; align-items: center; justify-content: space-between;
-      transition: transform .1s, border-color .2s, background-color .2s;
-    }
-    .task-item:hover { border-color: #cbd5e1; }
+    /* High Quality Table Layout Styles */
+    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--gray-border); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    /* Overdue Modification Class Injection Highlight Styling */
-    .task-item.overdue-warning {
-      background-color: var(--yellow-soft);
-      border-color: #f59e0b;
-    }
-    .task-item.overdue-warning:hover {
-      border-color: #d97706;
-    }
+    /* Strict Width Controls to Stop Text Overflow Collapses */
+    th:nth-child(1), td:nth-child(1) { width: 12%; } /* Project */
+    th:nth-child(2), td:nth-child(2) { width: 13%; } /* Institution */
+    th:nth-child(3), td:nth-child(3) { width: 32%; } /* Action Details */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Category */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Priority */
+    th:nth-child(6), td:nth-child(6) { width: 11%; } /* Due Date */
+    th:nth-child(7), td:nth-child(7) { width: 12%; } /* Owner */
+    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Operation */
+
+    th { background: var(--blue-deep); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--gray-text); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
     
-    .task-details { max-width: 75%; }
-    .task-desc { font-weight: 600; color: #1e293b; font-size: .95rem; margin-bottom: .2rem; }
-    .task-meta { font-size: .78rem; color: #64748b; line-height: 1.4; }
-    .badge {
-      display: inline-block; padding: .1rem .4rem; font-size: .7rem;
-      font-weight: 700; border-radius: 4px; text-transform: uppercase; margin-right: .3rem;
-    }
-    .badge.high { background: #fee2e2; color: #991b1b; }
-    .badge.medium { background: #fef3c7; color: #92400e; }
-    .badge.low { background: #e0f2fe; color: #0369a1; }
-    .badge.tab { background: #e2e8f0; color: #334155; }
-    .badge.overdue-flag { background: #dc2626; color: #ffffff; }
+    tr { transition: background-color 0.15s ease; }
+    tr:hover { background-color: #f8fafc; }
 
-    .btn-complete {
-      background: #10b981; color: #fff; font-size: .82rem; font-weight: 600;
-      padding: .5rem .8rem; border: none; border-radius: 8px; cursor: pointer;
-      display: inline-flex; align-items: center; gap: .3rem; transition: background .15s;
-    }
-    .btn-complete:hover { background: #059669; }
-    .empty-state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: .9rem; }
+    /* Overdue Highlighting Rules */
+    tr.task-overdue { background-color: var(--yellow-soft) !important; }
+    tr.task-overdue:hover { background-color: #fbeba8 !important; }
+    tr.task-overdue td { color: #5c4308; }
 
-    .flash {
-      display: none; padding: .75rem; border-radius: var(--radius);
-      font-size: .85rem; font-weight: 500; margin-bottom: 1rem;
+    .badge-overdue {
+      background-color: #e53e3e;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+      display: inline-block;
+      vertical-align: middle;
     }
-    .flash.success { background: var(--yellow-soft); color: #7a5e00; border: 1px solid var(--yellow); }
-    .flash.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
-    @media (max-width: 768px) {
-      body { padding: 0.5rem; }
-      .tabs-nav { margin-bottom: 0.5rem; }
-      .card-header { padding: 1rem; }
-      .card-body { padding: 1rem; }
-      .form-grid { grid-template-columns: 1fr; gap: 0.8rem; }
-      .full-width { grid-column: span 1; }
-      .task-item { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
-      .task-details { max-width: 100%; }
-      .btn-complete { width: 100%; justify-content: center; padding: 0.65rem; }
+    /* Badges & Action Items Styling Elements */
+    .priority-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; text-align: center; }
+    .priority-badge.high, .priority-badge.critical { background: #fed7d7; color: #9b2c2c; }
+    .priority-badge.medium { background: #feebc8; color: #c05621; }
+    .priority-badge.low { background: #e6fffa; color: #00664f; }
+
+    .badge-tab { background: #e2e8f0; color: #334155; padding: 0.2rem 0.4rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; }
+
+    .action-btn { padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.15s ease; border: none; width: 100%; text-align: center; }
+    .clear-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
+    .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); box-shadow: 0 2px 4px rgba(229,62,62,0.2); }
+
+    /* Retains neat desktop stacking ONLY on small tablet screens */
+    @media (max-width: 900px) { 
+      .dashboard-container { grid-template-columns: 1fr; } 
     }
   </style>
 </head>
 <body>
 
-  <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchTab(event, 'add-task-view')">Add New Action</button>
-    <button class="tab-btn" onclick="switchTab(event, 'complete-task-view')">Complete Task Tracker</button>
-  </div>
-
   <div class="dashboard-container">
     
-    <div id="add-task-view" class="tab-content active">
-      <div class="card">
-        <div class="card-header">
-          <h1>Log Action Item</h1>
-          <p>Log a project (Please log as many spaces as you can to avoid bugs - Ghassane)</p>
+    <div class="glass-card">
+      <h2>Add New Action</h2>
+      <div class="flash-container"><div id="formFlash" class="alert"></div></div>
+      
+      <form id="taskForm">
+        <div class="form-group">
+          <label>Target Sheet Tab Routing</label>
+          <select id="sheetSelector" name="sheet_select" required>
+            <option value="" disabled selected>Choose Sheet destination...</option>
+            <option value="INST_MAROC">INST_MAROC</option>
+            <option value="MTEDD">MTEDD</option>
+            <option value="AMCI">AMCI</option>
+            <option value="MAECA">MAECA</option>
+            <option value="DFI_GENERAL">DFI_GENERAL</option>
+            <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
+            <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
+            <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
+            <option value="Other">Other (Create New Tab...)</option>
+          </select>
         </div>
-        <div class="card-body">
-          <div class="flash" id="formFlash"></div>
-          <form id="trackerForm">
-            <div class="form-grid">
-              
-              <div class="field full-width" style="background: #f8fafc; padding: .8rem; border-radius: var(--radius); border: 1.5px dashed #cbd5e1;">
-                <label for="sheet_select">Excel Sheet Destination</label>
-                <select id="sheet_select" name="sheet_select" required>
-                    <option value="" disabled selected>Choose Sheet destination...</option>
-                    <option value="INST_MAROC">INST_MAROC</option>
-                    <option value="MTEDD">MTEDD</option>
-                    <option value="AMCI">AMCI</option>
-                    <option value="MAECA">MAECA</option>
-                    <option value="DFI_GENERAL">DFI_GENERAL</option>
-                    <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
-                    <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
-                    <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
-                    <option value="Other">Other (Create New Tab...)</option>
-                </select>
-                <div class="conditional-field" id="custom_sheet_box">
-                  <label for="custom_sheet">Specify Custom Sheet Title</label>
-                  <input type="text" id="custom_sheet" name="custom_sheet" placeholder="Type name for new tab..." />
-                </div>
-              </div>
-
-              <div class="field">
-                <label for="project">Project (Initiative)</label>
-                <input type="text" id="project" name="project" required />
-              </div>
-              <div class="field">
-                <label for="institution">Institution</label>
-                <input type="text" id="institution" name="institution" required />
-              </div>
-              <div class="field">
-                <label for="contacts">Key Contacts</label>
-                <input type="text" id="contacts" name="contacts" required />
-              </div>
-              <div class="field">
-                <label for="owner">Owner</label>
-                <input type="text" id="owner" name="owner" placeholder="e.g. Malik, Salma ..." required />
-              </div>
-              <div class="field">
-                <label for="category">Category</label>
-                <select id="category" name="category" required>
-                  <option value="Courrier">Courrier</option>
-                  <option value="Coordination">Coordination</option>
-                  <option value="Mission">Mission</option>
-                  <option value="Meeting">Meeting</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="priority">Priority</label>
-                <select id="priority" name="priority" required>
-                  <option value="Low">Low</option>
-                  <option value="Medium" selected>Medium</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="request_date">Request Date</label>
-                <input type="text" id="request_date" name="request_date" readonly />
-              </div>
-              <div class="field">
-                <label for="due_date">Due Date</label>
-                <input type="date" id="due_date" name="due_date" required />
-              </div>
-              <div class="field full-width">
-                <label for="action">Action (Short Description)</label>
-                <input type="text" id="action" name="action" required />
-              </div>
-              <div class="field full-width">
-                <label for="notes">Notes / Email Body Text</label>
-                <textarea id="notes" name="notes"></textarea>
-              </div>
-            </div>
-            <button type="submit" class="btn-submit">Add New Row Task →</button>
-          </form>
+        <div class="form-group" id="customSheetContainer" style="display: none;">
+          <label>Custom Tab Sheet Name</label>
+          <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
         </div>
-      </div>
+        <div class="form-group">
+          <label>Project / Initiative</label>
+          <input type="text" name="project" required placeholder="Project Name" />
+        </div>
+        <div class="form-group">
+          <label>Institution</label>
+          <input type="text" name="institution" required placeholder="Target Institution Name" />
+        </div>
+        <div class="form-group">
+          <label>Key Contacts</label>
+          <input type="text" name="contacts" required placeholder="Contact string details" />
+        </div>
+        <div class="form-group">
+          <label>Owner Allocation</label>
+          <input type="text" name="owner" required placeholder="e.g. Malik, Salma ..." />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" required>
+            <option value="Courrier">Courrier</option>
+            <option value="Coordination">Coordination</option>
+            <option value="Mission">Mission</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select name="priority" required>
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" name="due_date" required />
+        </div>
+        <div class="form-group">
+          <label>Request Date</label>
+          <input type="text" id="requestDate" name="request_date" readonly />
+        </div>
+        <div class="form-group">
+          <label>Action / Description</label>
+          <input type="text" name="action" required placeholder="Short operational task description..." />
+        </div>
+        <div class="form-group">
+          <label>Notes / Email Body Text</label>
+          <textarea name="notes" rows="3" placeholder="Optional background context..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Add New Row Task →</button>
+      </form>
     </div>
 
-    <div id="complete-task-view" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="background: #0f172a;">
-          <h1>To Do List</h1>
-          <p>Click on complete to remove it from active sheets and move it directly to the Finished bin.</p>
-        </div>
-        <div class="card-body" style="background: #fafafa;">
-          <div class="flash" id="feedFlash"></div>
-          <div class="task-feed" id="taskFeedContainer">
-            <div class="empty-state">Loading records from spreadsheet BackEnd ledger...</div>
-          </div>
-        </div>
+    <div class="glass-card">
+      <h2>Live Outstanding Operational Matrix</h2>
+      <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Institution</th>
+              <th>Action Details</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Due Date</th>
+              <th>Owner</th>
+              <th>Operation</th>
+            </tr>
+          </thead>
+          <tbody id="taskTableBody">
+            <tr><td colspan="8" style="text-align:center; padding:2rem;">Connecting with live operational data matrices...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
   </div>
 
-<script>
-  const form = document.getElementById('trackerForm');
-  const formFlash = document.getElementById('formFlash');
-  const feedFlash = document.getElementById('feedFlash');
-  const feedContainer = document.getElementById('taskFeedContainer');
-  const sheetSelect = document.getElementById('sheet_select');
-  const customSheetBox = document.getElementById('custom_sheet_box');
-  const customSheetInput = document.getElementById('custom_sheet');
-  const reqDateInput = document.getElementById('request_date');
+  <script>
+    const form = document.getElementById('taskForm');
+    const tableBody = document.getElementById('taskTableBody');
+    const formFlash = document.getElementById('formFlash');
+    const feedFlash = document.getElementById('feedFlash');
+    const sheetSelector = document.getElementById('sheetSelector');
+    const customSheetBox = document.getElementById('customSheetContainer');
+    const customSheetInput = document.getElementById('customSheetInput');
+    const reqDateInput = document.getElementById('requestDate');
 
-  // Sistema de pestañas interactivo
-  function switchTab(event, viewId) {
-    document.querySelectorAll('.tab-content').forEach(view => view.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    document.getElementById(viewId).classList.add('active');
-    event.currentTarget.classList.add('active');
-  }
+    // Create target time comparisons
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    reqDateInput.value = todayStr;
+    const todayDateObj = new Date(todayStr + "T00:00:00");
 
-  // Cargar Request Date con formato estandarizado
-  const todayStr = new Date().toISOString().split('T')[0];
-  reqDateInput.value = todayStr;
-  const todayDateObj = new Date(todayStr + "T00:00:00");
-
-  sheetSelect.addEventListener('change', function() {
-    if (this.value === 'Other') {
-      customSheetBox.style.display = 'block';
-      customSheetInput.setAttribute('required', 'true');
-    } else {
-      customSheetBox.style.display = 'none';
-      customSheetInput.removeAttribute('required');
-      customSheetInput.value = '';
-    }
-  });
-
-  function alertBox(element, message, type) {
-    element.textContent = message;
-    element.className = `flash ${type}`;
-    element.style.display = 'block';
-    setTimeout(() => { element.style.display = 'none'; }, 5000);
-  }
-
-  // Carga e indexación sincronizada con el script de OneDrive/Python
-  async function loadActiveTasksRegistry() {
-    try {
-      const res = await fetch('/tasks');
-      const tasks = await res.json() || [];
-      
-      if (tasks.length === 0) {
-        feedContainer.innerHTML = `<div class="empty-state">✓ All clear! No active tracking rows inside central BackEnd matrix repository.</div>`;
-        return;
-      }
-
-      feedContainer.innerHTML = '';
-      tasks.forEach(task => {
-        const item = document.createElement('div');
-        item.className = 'task-item';
-        
-        let isOverdue = false;
-        let overdueBadgeHtml = '';
-        
-        // Conversión segura de formatos de fecha DD/MM/YYYY provistos por openpyxl
-        if (task.due_date && task.due_date !== 'N/A' && task.due_date !== 'None') {
-          let taskDueDateObj;
-          if (task.due_date.includes('/')) {
-            const parts = task.due_date.split('/');
-            taskDueDateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-          } else {
-            taskDueDateObj = new Date(task.due_date + "T00:00:00");
-          }
-
-          if (taskDueDateObj < todayDateObj) {
-            isOverdue = true;
-            item.classList.add('overdue-warning');
-            overdueBadgeHtml = `<span class="badge overdue-flag">Overdue</span>`;
-          }
-        }
-        
-        const taskPriority = task.priority ? task.priority.toString() : 'Medium';
-        const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
-
-        item.innerHTML = `
-          <div class="task-details">
-            <div class="task-desc">${task.action || 'Untitled Action'}</div>
-            <div class="task-meta">
-              <span class="badge tab">Sheet: ${task.sheet || 'BackEnd'}</span>
-              <span class="badge ${priorityClass}">${taskPriority}</span>
-              ${overdueBadgeHtml}
-              <br/>
-              <strong>Project:</strong> ${task.project || 'N/A'} | <strong>Owner:</strong> ${task.owner || 'Unassigned'} | <strong>Due:</strong> ${task.due_date || 'N/A'}
-            </div>
-          </div>
-          <div>
-            <button class="btn-complete" onclick="markTaskArchived(${task.backend_row_index})">Complete</button>
-          </div>
-        `;
-        feedContainer.appendChild(item);
-      });
-    } catch (err) {
-      console.error(err);
-      feedContainer.innerHTML = `<div class="empty-state" style="color: #ef4444;">Error reading from BackEnd matrix layer.</div>`;
-    }
-  }
-
-  // Envío seguro al endpoint de cierre de colas en el app.py local
-  async function markTaskArchived(backendRowIndex) {
-    try {
-      const res = await fetch('/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ backend_row_index: backendRowIndex })
-      });
-      
-      if (res.ok) {
-        alertBox(feedFlash, '✓ Row cleared from project registry and moved to Finished bin!', 'success');
-        loadActiveTasksRegistry();
+    sheetSelector.addEventListener('change', function() {
+      if (this.value === 'Other') {
+        customSheetBox.style.display = 'block';
+        customSheetInput.setAttribute('required', 'true');
       } else {
-        alertBox(feedFlash, 'Execution blocked by server.', 'error');
-      }
-    } catch {
-      alertBox(feedFlash, 'Could not reach server pipeline layer.', 'error');
-    }
-  }
-
-  // Intercepción del formulario sincronizado con los mapeos exactos del Flask
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
-
-    try {
-      const res = await fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      if (res.ok) {
-        alertBox(formFlash, '✓ Successfully saved to your selected target sheet arrangement and BackEnd ledger!', 'success');
-        form.reset();
-        reqDateInput.value = todayStr;
         customSheetBox.style.display = 'none';
         customSheetInput.removeAttribute('required');
-        loadActiveTasksRegistry();
-      } else {
-        alertBox(formFlash, 'Ingestion failure inside local workspace.', 'error');
+        customSheetInput.value = '';
       }
-    } catch {
-      alertBox(formFlash, 'Network layer error trying to append data points.', 'error');
+    });
+
+    function alertBox(element, text, type = 'success') {
+      element.innerText = text;
+      element.className = `alert alert-${type}`;
+      element.style.display = 'block';
+      setTimeout(() => { element.style.display = 'none'; }, 5000);
     }
-  });
 
-  loadActiveTasksRegistry();
-</script>
+    async function loadActiveTasksRegistry() {
+      try {
+        const res = await fetch('/tasks');
+        if (!res.ok) throw new Error();
+        const tasks = await res.json() || [];
+        
+        tableBody.innerHTML = '';
 
+        if (tasks.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
+          return;
+        }
+
+        tasks.forEach(task => {
+          let isOverdue = false;
+          
+          // MATCHING EXCEL DICTIONARY DICT FROM mail_reader.py LINE 39 -> task["dueDate"]
+          let rawDueDate = task.dueDate || task.due_date || '';
+          let cleanDateStr = String(rawDueDate).trim();
+
+          if (cleanDateStr && cleanDateStr.toLowerCase() !== 'n/a' && cleanDateStr.toLowerCase() !== 'none') {
+            let taskDueDateObj;
+            if (cleanDateStr.includes('/')) {
+              const parts = cleanDateStr.split('/');
+              taskDueDateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            } else if (cleanDateStr.includes('-')) {
+              taskDueDateObj = new Date(cleanDateStr + "T00:00:00");
+            }
+
+            if (taskDueDateObj && !isNaN(taskDueDateObj.getTime())) {
+              if (taskDueDateObj < todayDateObj) {
+                isOverdue = true;
+              }
+            }
+          }
+
+          const rowStyle = isOverdue ? 'class="task-overdue"' : '';
+          const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue (Due: ${cleanDateStr})</span>` : '';
+          
+          const taskPriority = task.priority ? task.priority.toString() : 'Medium';
+          const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
+          
+          // MATCHING EXCEL DICTIONARY DICT FROM mail_reader.py LINE 43 -> task["backendRowIndex"]
+          let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
+
+          const rowHtml = `
+            <tr ${rowStyle}>
+              <td><strong>${task.project || 'N/A'}</strong></td>
+              <td>${task.institution || 'N/A'}</td>
+              <td>
+                <span class="badge-tab" style="margin-bottom:0.3rem;">${task.sheet || 'BackEnd'}</span><br>
+                ${task.action || 'Untitled Action'} ${tagSpan}
+              </td>
+              <td>${task.category || 'N/A'}</td>
+              <td><span class="priority-badge ${priorityClass}">${taskPriority}</span></td>
+              <td><strong>${cleanDateStr || 'N/A'}</strong></td>
+              <td><code>${task.owner || 'Unassigned'}</code></td>
+              <td>
+                <button class="action-btn clear-btn" onclick="archiveTaskRow(${activeRowIndex})">
+                  Complete
+                </button>
+              </td>
+            </tr>
+          `;
+          tableBody.insertAdjacentHTML('beforeend', rowHtml);
+        });
+      } catch (err) {
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#9b2c2c; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
+      }
+    }
+
+    async function archiveTaskRow(backendRowIndex) {
+      if (backendRowIndex === undefined || backendRowIndex === null) {
+        alertBox(feedFlash, 'Error: Missing backend index references.', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ backend_row_index: parseInt(backendRowIndex) })
+        });
+        
+        if (res.ok) {
+          alertBox(feedFlash, '✓ Row cleared from project registry and moved to Finished bin!', 'success');
+          loadActiveTasksRegistry();
+        } else {
+          alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
+        }
+      } catch {
+        alertBox(feedFlash, 'Could not reach server pipeline layer.', 'error');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          alertBox(formFlash, '✓ Successfully saved to your selected target sheet arrangement and BackEnd ledger!', 'success');
+          form.reset();
+          reqDateInput.value = todayStr;
+          customSheetBox.style.display = 'none';
+          customSheetInput.removeAttribute('required');
+          loadActiveTasksRegistry(); 
+        } else {
+          alertBox(formFlash, 'Ingestion failure inside tracking database.', 'error');
+        }
+      } catch {
+        alertBox(formFlash, 'Server connection dropped during submission.', 'error');
+      }
+    });
+
+    loadActiveTasksRegistry();
+  </script>
 </body>
 </html>
