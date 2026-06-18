@@ -14,8 +14,8 @@
       --slate-light:  #f8fafc;  
       --navy-blue:    #0f172a;  
       --accent-blue:  #2563eb;  
-      --overdue-bg:   #e0f2fe;  /* Light blue for overdue background */
-      --overdue-text: #0369a1;  /* Dark blue for overdue text */
+      --overdue-bg:   #e0f2fe;  /* Corporate light blue highlight for overdue rows */
+      --overdue-text: #0369a1;  /* Dark blue text color for overdue alerts */
       --white:        #ffffff;
       --gray-border:  #cbd5e1;
       --radius:       8px;
@@ -29,12 +29,12 @@
       color: var(--slate-deep);
     }
 
-    /* 50/50 Screen Layout Split */
+    /* Stacked Layout: Form on top, List on bottom */
     .dashboard-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 2rem;
-      max-width: 1800px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
@@ -72,8 +72,15 @@
     .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
     .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
-    /* Ingestion Form Elements (Unchanged back-end configuration names) */
-    .form-group { margin-bottom: 1.2rem; }
+    /* Form Fields (Layout structure completely untouched for submission accuracy) */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+    .form-group { margin-bottom: 0.2rem; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--slate-mid); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
       width: 100%;
@@ -89,6 +96,7 @@
     input[readonly] { background-color: #e2e8f0; color: var(--slate-mid); cursor: not-allowed; }
 
     .submit-btn {
+      grid-column: 1 / -1;
       width: 100%;
       background: var(--navy-blue);
       color: var(--white);
@@ -103,14 +111,14 @@
     }
     .submit-btn:hover { background: var(--accent-blue); }
 
-    /* Clean 4-Column Minimalist Table Layout */
+    /* Ultra-Clean 4-Column Table Grid Layout */
     .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius); border: 1px solid var(--gray-border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    th:nth-child(1), td:nth-child(1) { width: 50%; } /* Task Name & Overdue Tag */
-    th:nth-child(2), td:nth-child(2) { width: 18%; } /* Due Date Tag */
-    th:nth-child(3), td:nth-child(3) { width: 16%; } /* Owner */
-    th:nth-child(4), td:nth-child(4) { width: 16%; } /* Complete Action Button */
+    th:nth-child(1), td:nth-child(1) { width: 55%; } /* Task Name & Overdue Tag */
+    th:nth-child(2), td:nth-child(2) { width: 15%; } /* Due Date Tag */
+    th:nth-child(3), td:nth-child(3) { width: 15%; } /* Owner Allocations */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Complete Button Trigger */
 
     th { background: var(--navy-blue); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
     td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--slate-mid); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
@@ -118,7 +126,7 @@
     tr { background-color: var(--white); }
     tr:hover { background-color: var(--slate-light); }
 
-    /* Overdue Highlighting Theme */
+    /* Overdue Theming Rules */
     tr.task-overdue { background-color: var(--overdue-bg) !important; }
     tr.task-overdue td { color: var(--overdue-text); }
     tr.task-overdue strong { color: var(--navy-blue); }
@@ -152,10 +160,6 @@
     .action-btn { padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; transition: all 0.15s; }
     .clear-btn { background: var(--slate-light); border: 1px solid var(--gray-border); color: var(--slate-deep); }
     .clear-btn:hover { background: #b91c1c; border-color: #b91c1c; color: var(--white); }
-
-    @media (max-width: 1024px) { 
-      .dashboard-container { grid-template-columns: 1fr; } 
-    }
   </style>
 </head>
 <body>
@@ -167,82 +171,84 @@
       <div class="flash-container"><div id="formFlash" class="alert"></div></div>
       
       <form id="taskForm">
-        <div class="form-group">
-          <label>Target Sheet Tab Routing</label>
-          <select id="sheetSelector" name="sheet_select" required>
-            <option value="" disabled selected>Choose Sheet destination...</option>
-            <option value="INST_MAROC">INST_MAROC</option>
-            <option value="MTEDD">MTEDD</option>
-            <option value="AMCI">AMCI</option>
-            <option value="MAECA">MAECA</option>
-            <option value="DFI_GENERAL">DFI_GENERAL</option>
-            <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
-            <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
-            <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
-            <option value="Other">Other (Create New Tab...)</option>
-          </select>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Target Sheet Tab Routing</label>
+            <select id="sheetSelector" name="sheet_select" required>
+              <option value="" disabled selected>Choose Sheet destination...</option>
+              <option value="INST_MAROC">INST_MAROC</option>
+              <option value="MTEDD">MTEDD</option>
+              <option value="AMCI">AMCI</option>
+              <option value="MAECA">MAECA</option>
+              <option value="DFI_GENERAL">DFI_GENERAL</option>
+              <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
+              <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
+              <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
+              <option value="Other">Other (Create New Tab...)</option>
+            </select>
+          </div>
+          <div class="form-group" id="customSheetContainer" style="display: none;">
+            <label>Custom Tab Sheet Name</label>
+            <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
+          </div>
+          <div class="form-group">
+            <label>Project / Initiative</label>
+            <input type="text" name="project" required placeholder="Project Name" />
+          </div>
+          <div class="form-group">
+            <label>Institution</label>
+            <input type="text" name="institution" required placeholder="Target Institution Name" />
+          </div>
+          <div class="form-group">
+            <label>Key Contacts</label>
+            <input type="text" name="contacts" required placeholder="Contact string details" />
+          </div>
+          <div class="form-group">
+            <label>Owner Allocation</label>
+            <input type="text" name="owner" required placeholder="e.g. Malik, Salma ..." />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+              <option value="Courrier">Courrier</option>
+              <option value="Coordination">Coordination</option>
+              <option value="Mission">Mission</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select name="priority" required>
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input type="date" name="due_date" required />
+          </div>
+          <div class="form-group">
+            <label>Request Date</label>
+            <input type="text" id="requestDate" name="request_date" readonly />
+          </div>
+          <div class="form-group full-width">
+            <label>Action / Description</label>
+            <input type="text" name="action" required placeholder="Short operational task description..." />
+          </div>
+          <div class="form-group full-width">
+            <label>Notes / Email Body Text</label>
+            <textarea name="notes" rows="3" placeholder="Optional background context..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Add New Row Task →</button>
         </div>
-        <div class="form-group" id="customSheetContainer" style="display: none;">
-          <label>Custom Tab Sheet Name</label>
-          <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
-        </div>
-        <div class="form-group">
-          <label>Project / Initiative</label>
-          <input type="text" name="project" required placeholder="Project Name" />
-        </div>
-        <div class="form-group">
-          <label>Institution</label>
-          <input type="text" name="institution" required placeholder="Target Institution Name" />
-        </div>
-        <div class="form-group">
-          <label>Key Contacts</label>
-          <input type="text" name="contacts" required placeholder="Contact string details" />
-        </div>
-        <div class="form-group">
-          <label>Owner Allocation</label>
-          <input type="text" name="owner" required placeholder="e.g. Malik, Salma ..." />
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select name="category" required>
-            <option value="Courrier">Courrier</option>
-            <option value="Coordination">Coordination</option>
-            <option value="Mission">Mission</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Priority</label>
-          <select name="priority" required>
-            <option value="Low">Low</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="date" name="due_date" required />
-        </div>
-        <div class="form-group">
-          <label>Request Date</label>
-          <input type="text" id="requestDate" name="request_date" readonly />
-        </div>
-        <div class="form-group">
-          <label>Action / Description</label>
-          <input type="text" name="action" required placeholder="Short operational task description..." />
-        </div>
-        <div class="form-group">
-          <label>Notes / Email Body Text</label>
-          <textarea name="notes" rows="3" placeholder="Optional background context..."></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Add New Row Task →</button>
       </form>
     </div>
 
     <div class="glass-card">
-      <h2>To Do List</h2>
+      <h2>TO DO LIST</h2>
       <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
       
       <div class="table-container">
@@ -256,7 +262,7 @@
             </tr>
           </thead>
           <tbody id="taskTableBody">
-            <tr><td colspan="4" style="text-align:center; padding:2rem;">Connecting with live data matrices...</td></tr>
+            <tr><td colspan="4" style="text-align:center; padding:2rem;">Connecting with live operational data matrices...</td></tr>
           </tbody>
         </table>
       </div>
@@ -306,7 +312,7 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No tasks found.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No pending items inside the To Do list configuration.</td></tr>`;
           return;
         }
 
@@ -357,7 +363,7 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#991b1b; padding:2rem;">Active registry synchronization error.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#991b1b; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
       }
     }
 
@@ -374,10 +380,10 @@
         });
         
         if (res.ok) {
-          alertBox(feedFlash, '✓ Task cleared! Local script will migrate this item to the Finished sheet shortly.', 'success');
+          alertBox(feedFlash, '✓ Task cleared! The automation engine script will shift this record item to the Finished Excel spreadsheet row archive.', 'success');
           loadActiveTasksRegistry();
         } else {
-          alertBox(feedFlash, 'Execution blocked by server pipelines.', 'error');
+          alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
         }
       } catch {
         alertBox(feedFlash, 'Could not reach server pipeline layer.', 'error');
