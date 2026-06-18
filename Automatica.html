@@ -4,30 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Global Affairs Tracker Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&family=Syne:wght=700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     
     :root {
-      --blue-deep:   #1a3a5c;
-      --blue-mid:    #2563a8;
-      --blue-light:  #f0f4f8;
-      --yellow-soft: #fdf3c0;
+      --slate-deep:   #1e293b; /* Primary dark text/headers */
+      --slate-mid:    #475569;  /* Secondary textual elements */
+      --slate-light:  #f1f5f9;/* Content canvas gray background */
+      --navy-blue:    #0f172a;  /* Heavy structural borders and focal points */
+      --accent-blue:  #3b82f6; /* Action buttons and interaction bounds */
+      --overdue-blue: #e0f2fe; /* NEW: Light blue highlight for overdue entries */
+      --overdue-text: #0369a1; /* NEW: Dark blue text color for overdue entries */
       --white:       #ffffff;
-      --gray-border: #e2e8f0;
-      --gray-text:   #475569;
-      --radius:      12px;
+      --gray-border: #cbd5e1;
+      --radius:      8px;
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: var(--blue-light);
+      background: var(--slate-light);
       min-height: 100vh;
       padding: 2rem;
-      color: #1e293b;
+      color: var(--slate-deep);
     }
 
-    /* Fixed Widescreen 2-Column Grid Layout */
+    /* Fixed Widescreen 2-Column Desktop Grid Layout */
     .dashboard-container {
       display: grid;
       grid-template-columns: 420px 1fr;
@@ -40,68 +42,72 @@
       background: var(--white);
       border-radius: var(--radius);
       border: 1px solid var(--gray-border);
-      padding: 2.2rem;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       height: fit-content;
     }
 
     h2 {
-      font-family: 'Syne', sans-serif;
-      color: var(--blue-deep);
-      font-size: 1.6rem;
-      margin-bottom: 1.8rem;
-      border-bottom: 3px solid #f5c842;
-      padding-bottom: 0.6rem;
+      color: var(--navy-blue);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--gray-border);
+      padding-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
+    /* System Status Messages */
     .flash-container {
-      margin-bottom: 1.2rem;
-      min-height: 45px;
+      margin-bottom: 1rem;
+      min-height: 40px;
     }
     .alert {
       padding: 0.75rem 1rem;
-      border-radius: 8px;
+      border-radius: var(--radius);
       font-size: 0.9rem;
       font-weight: 500;
       display: none;
     }
-    .alert-success { background: #e6fffa; color: #00664f; border: 1px solid #b2f5ea; }
-    .alert-error { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
+    .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
-    /* Form Fields Styling */
+    /* Ingestion Form Elements (Unchanged Layout Structures) */
     .form-group { margin-bottom: 1.2rem; }
-    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--blue-deep); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--slate-mid); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid var(--gray-border);
-      border-radius: 8px;
+      border-radius: var(--radius);
       font-family: inherit;
       font-size: 0.95rem;
-      color: #334155;
-      background: #f8fafc;
+      color: var(--slate-deep);
+      background: var(--white);
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue-mid); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,168,0.12); }
-    input[readonly] { background-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    input[readonly] { background-color: var(--slate-light); color: var(--slate-mid); cursor: not-allowed; }
 
     .submit-btn {
       width: 100%;
-      background: var(--blue-deep);
+      background: var(--navy-blue);
       color: var(--white);
       border: none;
       padding: 1rem;
-      border-radius: 8px;
+      border-radius: var(--radius);
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
       margin-top: 0.5rem;
+      transition: background 0.2s;
     }
+    .submit-btn:hover { background: var(--accent-blue); }
 
-    /* Fixed Table Grid Layout Structure */
-    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--gray-border); }
+    /* Strict Permanent Column Matrices Setup */
+    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius); border: 1px solid var(--gray-border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    /* Strict Structural Column Controls */
     th:nth-child(1), td:nth-child(1) { width: 12%; }
     th:nth-child(2), td:nth-child(2) { width: 13%; }
     th:nth-child(3), td:nth-child(3) { width: 32%; }
@@ -111,38 +117,40 @@
     th:nth-child(7), td:nth-child(7) { width: 12%; }
     th:nth-child(8), td:nth-child(8) { width: 10%; }
 
-    th { background: var(--blue-deep); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
-    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--gray-text); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
+    th { background: var(--navy-blue); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+    td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--slate-mid); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
     
-    tr { transition: background-color 0.15s ease; }
-    tr:hover { background-color: #f8fafc; }
+    tr { background-color: var(--white); }
+    tr:hover { background-color: var(--slate-light); }
 
-    /* Overdue Colors */
-    tr.task-overdue { background-color: var(--yellow-soft) !important; }
-    tr.task-overdue td { color: #5c4308; }
+    /* NEW: Overdue Highlighting Theme (Light Blue Palette Adaptation) */
+    tr.task-overdue { background-color: var(--overdue-blue) !important; }
+    tr.task-overdue td { color: var(--overdue-text); }
+    tr.task-overdue strong { color: var(--navy-blue); }
 
     .badge-overdue {
-      background-color: #e53e3e;
-      color: #ffffff;
+      background-color: var(--overdue-text);
+      color: var(--white);
       font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.2rem 0.4rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 4px;
       text-transform: uppercase;
       margin-top: 0.4rem;
       display: inline-block;
     }
 
-    .priority-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; text-align: center; }
-    .priority-badge.high, .priority-badge.critical { background: #fed7d7; color: #9b2c2c; }
-    .priority-badge.medium { background: #feebc8; color: #c05621; }
-    .priority-badge.low { background: #e6fffa; color: #00664f; }
+    /* Badges & Operations Layout Controls */
+    .priority-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; text-align: center; }
+    .priority-badge.high, .priority-badge.critical { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    .priority-badge.medium { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .priority-badge.low { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 
-    .badge-tab { background: #e2e8f0; color: #334155; padding: 0.2rem 0.4rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; }
+    .badge-tab { background: var(--slate-light); color: var(--slate-deep); border: 1px solid var(--gray-border); padding: 0.2rem 0.4rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; }
 
-    .action-btn { padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; }
-    .clear-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
-    .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); }
+    .action-btn { padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; transition: all 0.15s; }
+    .clear-btn { background: var(--slate-light); border: 1px solid var(--gray-border); color: var(--slate-deep); }
+    .clear-btn:hover { background: var(--slate-deep); border-color: var(--slate-deep); color: var(--white); }
 
     @media (max-width: 900px) { 
       .dashboard-container { grid-template-columns: 1fr; } 
@@ -301,7 +309,7 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--slate-mid);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
           return;
         }
 
@@ -326,15 +334,15 @@
             }
           }
 
+          // Strict assignment to prevent formatting breaks
           const rowStyle = isOverdue ? 'class="task-overdue"' : '';
-          const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue (Due: ${cleanDateStr})</span>` : '';
+          const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue</span>` : '';
           
           const taskPriority = task.priority ? task.priority.toString() : 'Medium';
           const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
           
           let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
 
-          // DRASTIC ARCHITECTURAL LAYOUT DEFENSE: Safe formatting string keys explicitly isolated
           const rowHtml = `
             <tr ${rowStyle}>
               <td><strong>${task.project || 'N/A'}</strong></td>
@@ -357,7 +365,7 @@
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
         });
       } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#9b2c2c; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#991b1b; padding:2rem;">Active registry serialization drop error logs.</td></tr>`;
       }
     }
 
@@ -367,6 +375,7 @@
         return;
       }
       try {
+        // Enforces structural backend mapping consistency matching app.py exactly
         const res = await fetch('/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -374,7 +383,7 @@
         });
         
         if (res.ok) {
-          alertBox(feedFlash, '✓ Action queued! Local script will move this task to the Finished spreadsheet shortly.', 'success');
+          alertBox(feedFlash, '✓ Action queued successfully! The local background engine script will migrate this row item to the Finished Excel spreadsheet momentarily.', 'success');
           loadActiveTasksRegistry();
         } else {
           alertBox(feedFlash, 'Execution blocked by server context pipelines.', 'error');
