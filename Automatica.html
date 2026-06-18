@@ -27,7 +27,7 @@
       color: #1e293b;
     }
 
-    /* Fixed Widescreen 2-Column Desktop Grid Layout */
+    /* Fixed Widescreen 2-Column Grid Layout */
     .dashboard-container {
       display: grid;
       grid-template-columns: 420px 1fr;
@@ -54,7 +54,6 @@
       padding-bottom: 0.6rem;
     }
 
-    /* Alerts and Feedback Banners */
     .flash-container {
       margin-bottom: 1.2rem;
       min-height: 45px;
@@ -65,14 +64,11 @@
       font-size: 0.9rem;
       font-weight: 500;
       display: none;
-      animation: fadeIn 0.25s ease-in-out;
     }
     .alert-success { background: #e6fffa; color: #00664f; border: 1px solid #b2f5ea; }
     .alert-error { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Forms Input Layout */
+    /* Form Fields Styling */
     .form-group { margin-bottom: 1.2rem; }
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--blue-deep); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea {
@@ -84,7 +80,6 @@
       font-size: 0.95rem;
       color: #334155;
       background: #f8fafc;
-      transition: all 0.15s ease;
     }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue-mid); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,168,0.12); }
     input[readonly] { background-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
@@ -99,34 +94,31 @@
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s ease;
       margin-top: 0.5rem;
     }
-    .submit-btn:hover { background: var(--blue-mid); }
 
-    /* High Quality Fixed Table Layout Structure */
+    /* Fixed Table Grid Layout Structure */
     .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--gray-border); }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
     
-    /* Enforces Permanent Strict Column Widths */
-    th:nth-child(1), td:nth-child(1) { width: 12%; } /* Project */
-    th:nth-child(2), td:nth-child(2) { width: 13%; } /* Institution */
-    th:nth-child(3), td:nth-child(3) { width: 32%; } /* Action Details */
-    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Category */
-    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Priority */
-    th:nth-child(6), td:nth-child(6) { width: 11%; } /* Due Date */
-    th:nth-child(7), td:nth-child(7) { width: 12%; } /* Owner */
-    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Operation */
+    /* Strict Structural Column Controls */
+    th:nth-child(1), td:nth-child(1) { width: 12%; }
+    th:nth-child(2), td:nth-child(2) { width: 13%; }
+    th:nth-child(3), td:nth-child(3) { width: 32%; }
+    th:nth-child(4), td:nth-child(4) { width: 10%; }
+    th:nth-child(5), td:nth-child(5) { width: 10%; }
+    th:nth-child(6), td:nth-child(6) { width: 11%; }
+    th:nth-child(7), td:nth-child(7) { width: 12%; }
+    th:nth-child(8), td:nth-child(8) { width: 10%; }
 
-    th { background: var(--blue-deep); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+    th { background: var(--blue-deep); color: var(--white); padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
     td { padding: 1rem; border-bottom: 1px solid var(--gray-border); color: var(--gray-text); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
     
     tr { transition: background-color 0.15s ease; }
     tr:hover { background-color: #f8fafc; }
 
-    /* Overdue Highlighting Rules */
+    /* Overdue Colors */
     tr.task-overdue { background-color: var(--yellow-soft) !important; }
-    tr.task-overdue:hover { background-color: #fbeba8 !important; }
     tr.task-overdue td { color: #5c4308; }
 
     .badge-overdue {
@@ -148,9 +140,9 @@
 
     .badge-tab { background: #e2e8f0; color: #334155; padding: 0.2rem 0.4rem; font-size: 0.7rem; font-weight: 600; border-radius: 4px; text-transform: uppercase; display: inline-block; }
 
-    .action-btn { padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.15s ease; border: none; width: 100%; text-align: center; }
+    .action-btn { padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: none; width: 100%; text-align: center; }
     .clear-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
-    .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); box-shadow: 0 2px 4px rgba(229,62,62,0.2); }
+    .clear-btn:hover { background: #e53e3e; border-color: #e53e3e; color: var(--white); }
 
     @media (max-width: 900px) { 
       .dashboard-container { grid-template-columns: 1fr; } 
@@ -309,7 +301,7 @@
         tableBody.innerHTML = '';
 
         if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clear! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-text);">✓ All clean! No active tracking rows inside central BackEnd matrix repository.</td></tr>`;
           return;
         }
 
@@ -340,9 +332,9 @@
           const taskPriority = task.priority ? task.priority.toString() : 'Medium';
           const priorityClass = ['high', 'critical'].includes(taskPriority.toLowerCase()) ? 'high' : (taskPriority.toLowerCase() === 'low' ? 'low' : 'medium');
           
-          // Fallback check to safely grab index key definitions
           let activeRowIndex = task.backendRowIndex !== undefined ? task.backendRowIndex : task.backend_row_index;
 
+          // DRASTIC ARCHITECTURAL LAYOUT DEFENSE: Safe formatting string keys explicitly isolated
           const rowHtml = `
             <tr ${rowStyle}>
               <td><strong>${task.project || 'N/A'}</strong></td>
@@ -375,7 +367,6 @@
         return;
       }
       try {
-        // FIXED FOR APP.PY EXPECTATIONS: Using snake_case property keys
         const res = await fetch('/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
