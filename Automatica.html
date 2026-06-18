@@ -143,9 +143,9 @@
     }
     .task-item:hover { border-color: #cbd5e1; }
     
-    /* MODIFIED: Overdue Explicit Yellow Highlight Styling for Entire Background */
+    /* Overdue Modification Class Injection Highlight Styling */
     .task-item.overdue-warning {
-      background-color: var(--yellow-soft) !important;
+      background-color: var(--yellow-soft);
       border-color: #f59e0b;
     }
     .task-item.overdue-warning:hover {
@@ -318,6 +318,7 @@
   const customSheetInput = document.getElementById('custom_sheet');
   const reqDateInput = document.getElementById('request_date');
 
+  // Sistema de pestañas interactivo
   function switchTab(event, viewId) {
     document.querySelectorAll('.tab-content').forEach(view => view.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -326,6 +327,7 @@
     event.currentTarget.classList.add('active');
   }
 
+  // Cargar Request Date con formato estandarizado
   const todayStr = new Date().toISOString().split('T')[0];
   reqDateInput.value = todayStr;
   const todayDateObj = new Date(todayStr + "T00:00:00");
@@ -348,6 +350,7 @@
     setTimeout(() => { element.style.display = 'none'; }, 5000);
   }
 
+  // Carga e indexación sincronizada con el script de OneDrive/Python
   async function loadActiveTasksRegistry() {
     try {
       const res = await fetch('/tasks');
@@ -366,7 +369,7 @@
         let isOverdue = false;
         let overdueBadgeHtml = '';
         
-        // Date parser handles standard dates and format rule discrepancies gracefully
+        // Conversión segura de formatos de fecha DD/MM/YYYY provistos por openpyxl
         if (task.due_date && task.due_date !== 'N/A' && task.due_date !== 'None') {
           let taskDueDateObj;
           if (task.due_date.includes('/')) {
@@ -378,9 +381,8 @@
 
           if (taskDueDateObj < todayDateObj) {
             isOverdue = true;
-            item.classList.add('overdue-warning'); // Triggers yellow background layout rule
-            // MODIFIED: Displays actual due date explicitly inside the badge payload
-            overdueBadgeHtml = `<span class="badge overdue-flag">Overdue (Due: ${task.due_date})</span>`;
+            item.classList.add('overdue-warning');
+            overdueBadgeHtml = `<span class="badge overdue-flag">Overdue</span>`;
           }
         }
         
@@ -410,6 +412,7 @@
     }
   }
 
+  // Envío seguro al endpoint de cierre de colas en el app.py local
   async function markTaskArchived(backendRowIndex) {
     try {
       const res = await fetch('/complete', {
@@ -429,6 +432,7 @@
     }
   }
 
+  // Intercepción del formulario sincronizado con los mapeos exactos del Flask
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
