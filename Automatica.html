@@ -200,13 +200,63 @@
     .empty-state, .error-state { text-align: center; padding: 2.5rem 1rem; color: var(--slate); }
     .error-state { color: var(--danger-text); }
 
+    /* ── Mobile: To Do List card layout ─────────────────────────────── */
     @media (max-width: 640px) {
       .app-header { padding: 1rem; }
       .tab-nav { width: 100%; justify-content: stretch; }
       .tab-btn { flex: 1; justify-content: center; }
       .glass-card { padding: 1.25rem; }
       .card-header-row { flex-direction: column; align-items: flex-start; }
+
+      /* Hide the desktop table entirely on mobile */
+      .table-container { display: none; }
+
+      /* Show the mobile card list instead */
+      .task-card-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+
+      .task-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.9rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      }
+      .task-card.task-overdue {
+        background-color: var(--amber-bg);
+        border-color: #f0c060;
+      }
+      .task-card.task-overdue .task-card-title { color: var(--navy); }
+      .task-card.task-overdue .task-card-meta { color: var(--amber-text); }
+
+      .task-card-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--slate-deep);
+        line-height: 1.4;
+      }
+      .task-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--slate);
+      }
+      .task-card-meta .date-tag { font-size: 0.78rem; }
+      .task-card-meta code { font-size: 0.82rem; }
+      .task-card .action-btn {
+        width: 100%;
+        padding: 0.65rem;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+      }
     }
+
+    /* Hide the card list on desktop — it's only for mobile */
+    .task-card-list { display: none; }
   </style>
 </head>
 <body>
@@ -247,7 +297,7 @@
           <form id="taskForm">
             <div class="form-grid">
               <div class="form-group">
-                <label>Target Sheet Tab Routing</label>
+                <label>Target Sheet</label>
                 <select id="sheetSelector" name="sheet_select" required>
                   <option value="" disabled selected>Choose Sheet destination...</option>
                   <option value="INST_MAROC">INST_MAROC</option>
@@ -345,6 +395,11 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Mobile-only card list (populated by the same JS) -->
+          <div class="task-card-list" id="taskCardList">
+            <div class="task-card" style="text-align:center;color:var(--slate);">Connecting with live operational data matrices...</div>
+          </div>
         </div>
       </section>
 
@@ -354,6 +409,7 @@
   <script>
     const form = document.getElementById('taskForm');
     const tableBody = document.getElementById('taskTableBody');
+    const taskCardList = document.getElementById('taskCardList');
     const formFlash = document.getElementById('formFlash');
     const feedFlash = document.getElementById('feedFlash');
     const sheetSelector = document.getElementById('sheetSelector');
@@ -439,9 +495,11 @@
 
         todoCountEl.textContent = tasks.length;
         tableBody.innerHTML = '';
+        taskCardList.innerHTML = '';
 
         if (tasks.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">✓ All clean! No pending items inside the To Do list configuration.</td></tr>`;
+          taskCardList.innerHTML = `<div class="task-card" style="text-align:center;color:var(--slate);">✓ All clean! No pending items.</div>`;
           return;
         }
 
@@ -474,9 +532,24 @@
             </tr>
           `;
           tableBody.insertAdjacentHTML('beforeend', rowHtml);
+
+          // Mobile card version
+          const cardClass = isOverdue ? ' task-overdue' : '';
+          const cardHtml = `
+            <div class="task-card${cardClass}">
+              <div class="task-card-title">${actionDesc}${isOverdue ? ' <span class="badge-overdue">Overdue</span>' : ''}</div>
+              <div class="task-card-meta">
+                <span class="date-tag">${cleanDateStr || 'N/A'}</span>
+                <code>${ownerName}</code>
+              </div>
+              <button class="action-btn clear-btn" onclick="archiveTaskRow(${activeRowIndex})">Complete</button>
+            </div>
+          `;
+          taskCardList.insertAdjacentHTML('beforeend', cardHtml);
         });
       } catch (err) {
         tableBody.innerHTML = `<tr><td colspan="4" class="error-state">Active registry serialization drop error logs.</td></tr>`;
+        taskCardList.innerHTML = `<div class="task-card" style="text-align:center;color:var(--danger-text);">Active registry serialization drop error logs.</div>`;
       }
     }
 
