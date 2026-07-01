@@ -132,7 +132,7 @@
     .file-msg { font-size: 1rem; font-weight: 600; color: var(--navy); }
     .file-sub { font-size: 0.85rem; color: var(--slate); margin-top: 0.5rem; }
 
-    /* Mobile Compatibility */
+    /* Mobile Compatibility (Bug 2 fixes included) */
     @media (max-width: 900px) {
       body { padding: 0.75rem; }
       .app-header { padding: 1rem; flex-direction: column; align-items: flex-start; }
@@ -147,6 +147,7 @@
       .task-card-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.82rem; color: var(--slate); }
       .dashboard-grid { grid-template-columns: 1fr; }
     }
+    
     .task-card-list { display: none; }
   </style>
 </head>
@@ -386,23 +387,40 @@
         const tasks = payload.active || [];
         const finished = payload.finished || [];
 
-        // Main To-Do Sorting
+        // Main To-Do Sorting (Soonest First)
         tasks.sort((a, b) => {
           const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
           if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
           return da - db;
         });
 
-        // 1. Dashboard Filters
+        // Dashboard Sorting Logic (Bug 3 Fixes)
         const overdue = tasks.filter(t => parseTaskDate(t.dueDate) && parseTaskDate(t.dueDate) < todayDateObj);
-        const meetings = tasks.filter(t => (t.category||'').toLowerCase().includes('meeting') && (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj));
-        const courrier = tasks.filter(t => (t.category||'').toLowerCase().includes('courrier') && (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj));
+        
+        // Remove date restrictions so ALL meetings and courrier show up, then sort by nearest due date
+        const meetings = tasks.filter(t => (t.category||'').toLowerCase().includes('meeting'));
+        const courrier = tasks.filter(t => (t.category||'').toLowerCase().includes('courrier'));
+        
+        const dateSort = (a, b) => {
+          const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
+          if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
+          return da - db;
+        };
+        meetings.sort(dateSort);
+        courrier.sort(dateSort);
+
         const priorities = tasks.filter(t => 
           !(t.category||'').toLowerCase().includes('meeting') && 
           !(t.category||'').toLowerCase().includes('courrier') && 
           (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj)
         );
-        const newest = [...tasks].sort((a, b) => b.backendRowIndex - a.backendRowIndex);
+
+        // Newest tasks by Request Date (closest to today first)
+        const newest = [...tasks].sort((a, b) => {
+          const da = parseTaskDate(a.requestDate) || new Date(0);
+          const db = parseTaskDate(b.requestDate) || new Date(0);
+          return db - da; 
+        });
 
         renderDashList('dashPriorities', priorities.slice(0, 7));
         renderDashList('dashMeetings', meetings.slice(0, 7));
@@ -411,12 +429,13 @@
         renderDashList('dashNewest', newest.slice(0, 7));
         renderDashList('dashFinished', finished.slice(0, 7));
 
-        // 2. To-Do Table population
+        // To-Do Table population
         todoCountEl.textContent = tasks.length;
         tableBody.innerHTML = ''; taskCardList.innerHTML = '';
+        
         if (tasks.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">✓ All clean!</td></tr>`;
-          taskCardList.innerHTML = `<div class="task-card empty-state">✓ All clean!</div>`;
+          taskCardList.innerHTML = `<div class="task-card empty-state" style="text-align:center;">✓ All clean!</div>`;
           return;
         }
 
@@ -472,7 +491,7 @@
       } catch {}
     });
 
-    // Business Card Upload Logic (Converts to Base64 to bypass Render filesystem restrictions)
+    // Business Card Upload Logic
     document.getElementById('cardUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -499,7 +518,7 @@
     });
 
     loadActiveTasksRegistry();
-    setInterval(loadActiveTasksRegistry, 15000); // Polling faster to catch heartbeat syncs
+    setInterval(loadActiveTasksRegistry, 15000);
   </script>
 </body>
 </html>
