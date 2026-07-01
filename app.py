@@ -4,12 +4,15 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__, template_folder='.')
 
-# System data queues holding synchronization records and active view states
+# System data queues holding synchronization records, active view states, and image uploads
 DATA_QUEUES = {
     "NEW_TASK": [],
-    "COMPLETE_TASK": []
+    "COMPLETE_TASK": [],
+    "NEW_CARD": []
 }
+
 ACTIVE_EXCEL_TASKS = []
+FINISHED_EXCEL_TASKS = []
 
 @app.route('/')
 def index():
@@ -20,7 +23,6 @@ def submit():
     try:
         form_data = request.get_json() if request.is_json else request.form.to_dict()
         
-        # Parse and standardize formatting rules
         due_date = form_data.get('due_date', '')
         if due_date and '-' in due_date:
             due_date = datetime.strptime(due_date, '%Y-%m-%d').strftime('%d/%m/%Y')
@@ -29,7 +31,6 @@ def submit():
         if req_date and '-' in req_date:
             req_date = datetime.strptime(req_date, '%Y-%m-%d').strftime('%d/%m/%Y')
 
-        # Map frontend names to backend payload structure
         target_sheet = form_data.get('sheet_select', 'BackEnd')
         if target_sheet == 'Other':
             target_sheet = form_data.get('custom_sheet', 'CustomTab')
@@ -57,37 +58,47 @@ def submit():
 def complete():
     try:
         form_data = request.get_json() if request.is_json else request.form.to_dict()
-        
-        closure_payload = {
-            "backend_row_index": form_data.get('backend_row_index', '')
-        }
-        
+        closure_payload = {"backend_row_index": form_data.get('backend_row_index', '')}
         DATA_QUEUES["COMPLETE_TASK"].append(closure_payload)
         return jsonify({"status": "success", "message": "Task completion queued!"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Endpoint for HTML layout script to look up live active rows
+@app.route('/upload-card', methods=['POST'])
+def upload_card():
+    try:
+        data = request.get_json()
+        DATA_QUEUES["NEW_CARD"].append({
+            "filename": data.get('filename', f"card_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"),
+            "image_data": data.get('image_data', '')
+        })
+        return jsonify({"status": "success", "message": "Business card queued for local download!"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/tasks', methods=['GET'])
 def get_dashboard_tasks():
-    return jsonify(ACTIVE_EXCEL_TASKS)
+    # Return both active and recently finished tasks for the dashboard
+    return jsonify({
+        "active": ACTIVE_EXCEL_TASKS,
+        "finished": FINISHED_EXCEL_TASKS
+    })
 
-# Endpoint for your local machine script to fetch submission operations
 @app.route('/sync-pull', methods=['GET'])
 def sync_pull():
     return jsonify(DATA_QUEUES)
 
-# Endpoint for your local script to push active spreadsheet records back up to the web dashboard
 @app.route('/sync-clear', methods=['POST'])
 def sync_clear():
-    global DATA_QUEUES, ACTIVE_EXCEL_TASKS
-    
+    global DATA_QUEUES, ACTIVE_EXCEL_TASKS, FINISHED_EXCEL_TASKS
     incoming_payload = request.get_json() or {}
-    # Retain the latest state of active items from Excel inside cloud memory
+    
     if "active_tasks" in incoming_payload:
         ACTIVE_EXCEL_TASKS = incoming_payload["active_tasks"]
+    if "finished_tasks" in incoming_payload:
+        FINISHED_EXCEL_TASKS = incoming_payload["finished_tasks"]
         
-    DATA_QUEUES = {"NEW_TASK": [], "COMPLETE_TASK": []}
+    DATA_QUEUES = {"NEW_TASK": [], "COMPLETE_TASK": [], "NEW_CARD": []}
     return jsonify({"status": "success", "message": "Cloud arrays updated and flushed cleanly."})
 
 if __name__ == '__main__':
