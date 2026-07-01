@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Task Tracker</title>
+  <title>Automatica Enterprise Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
+    /* Executive Palette Design System */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    
     :root {
       --navy:         #0B1F3D;
       --navy-soft:    #14294b;
@@ -22,713 +23,966 @@
       --amber-strong: #B45309;  
       --slate:        #475569;
       --slate-deep:   #1e293b;
-      --border:       #d7e1f0;
-      --white:        #ffffff;
-      --danger-bg:    #fef2f2;
-      --danger-text:  #991b1b;
-      --danger-border:#fca5a5;
-      --radius:       12px;
-      --radius-sm:    8px;
+      --bg-main:      #F8FAFC;
+      --border-color: #E2E8F0;
+      --radius-lg:    12px;
+      --radius-md:    8px;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md:    0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(180deg, #eef3fb 0%, #f6f8fc 55%, #f8fafc 100%);
+      background-color: var(--bg-main);
+      color: var(--slate-deep);
+      display: flex;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Left Sidebar Panel Layout */
+    .sidebar {
+      width: 280px;
+      background-color: var(--navy);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      position: fixed;
+      height: 100vh;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-brand span {
+      color: var(--gold);
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #94A3B8;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-item button:hover {
+      background-color: var(--navy-soft);
+      color: white;
+    }
+
+    .nav-item.active button {
+      background-color: var(--blue);
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Main Content Container Frame */
+    .main-wrapper {
+      margin-left: 280px;
+      flex: 1;
+      padding: 2.5rem;
+      max-width: 1400px;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .view-section.active-view {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Component Architecture: Cards */
+    .view-header {
+      margin-bottom: 2rem;
+    }
+
+    .view-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+
+    .view-header p {
+      color: var(--slate);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Interactive Operational Dashboard Elements */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
       padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--slate);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    /* Clean Form Control Fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    input, select, textarea {
+      padding: 0.65rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: #FFF;
+      color: var(--slate-deep);
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    /* Modern Table Lists */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: var(--blue-pale);
+      color: var(--navy);
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
       color: var(--slate-deep);
     }
 
-    .page-shell { max-width: 1400px; margin: 0 auto; }
-
-    .app-header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1.25rem; flex-wrap: wrap; background: var(--navy);
-      padding: 1.1rem 1.75rem; border-radius: var(--radius);
-      border-bottom: 3px solid var(--gold); margin-bottom: 1.5rem;
-      box-shadow: 0 10px 30px -16px rgba(11,31,61,0.55);
+    tr:last-child td {
+      border-bottom: none;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.75rem; }
-    .brand-emblem { flex-shrink: 0; }
-    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-    .brand-title { color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.2px; }
-    .brand-sub { color: var(--gold-light); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 0.15rem; }
-
-    .tab-nav { display: flex; flex-wrap: wrap; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; padding: 0.3rem; gap: 0.25rem; }
-    .tab-btn {
-      border: none; background: transparent; color: #c7d4ea;
-      padding: 0.6rem 1.15rem; border-radius: 999px;
-      font-family: inherit; font-weight: 700; font-size: 0.74rem;
-      text-transform: uppercase; letter-spacing: 0.6px;
-      cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-      transition: background 0.18s ease, color 0.18s ease; white-space: nowrap;
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.6rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
     }
-    .tab-btn:hover { color: #fff; }
-    .tab-btn.active { background: var(--gold); color: var(--navy); }
-    .tab-count { background: rgba(255,255,255,0.18); color: #fff; font-size: 0.68rem; font-weight: 700; min-width: 1.25rem; text-align: center; padding: 0.05rem 0.4rem; border-radius: 999px; }
-    .tab-btn.active .tab-count { background: var(--navy); color: var(--gold-light); }
 
-    .tab-panel { display: none; animation: fadeIn 0.18s ease; }
-    .tab-panel.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .badge-high { background-color: #FEE2E2; color: #991B1B; }
+    .badge-medium { background-color: var(--amber-bg); color: var(--amber-text); }
+    .badge-low { background-color: #E2E8F0; color: var(--slate); }
 
-    .glass-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 2rem; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 28px -18px rgba(15,23,42,0.18); }
-    .card-header-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 3px solid var(--gold-light); padding-bottom: 0.65rem; }
-    h2 { color: var(--navy); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-    .legend { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 600; color: var(--slate); text-transform: none; }
-    .legend-swatch { width: 0.7rem; height: 0.7rem; border-radius: 3px; background: var(--amber-bg); border: 1px solid var(--amber-strong); display: inline-block; }
-
-    .flash-container { margin-bottom: 1rem; min-height: 0; }
-    .alert { padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; display: none; }
-    .alert-success { background: var(--blue-pale); color: var(--blue-dark); border: 1px solid var(--blue-100); }
-    .alert-error { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
-
-    /* Form Fields */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
-    .form-group { margin-bottom: 0.2rem; }
-    .form-group.full-width { grid-column: 1 / -1; }
-    label { display: block; font-size: 0.76rem; font-weight: 700; color: var(--slate); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.95rem; color: var(--slate-deep); background: var(--white); }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,0.14); }
-    input[readonly] { background-color: #eef2f8; color: var(--slate); cursor: not-allowed; }
-    .submit-btn { grid-column: 1 / -1; width: 100%; background: var(--blue); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-    .submit-btn:hover { background: var(--blue-dark); }
-
-    /* Tables */
-    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
-    th:nth-child(1), td:nth-child(1) { width: 50%; }
-    th:nth-child(2), td:nth-child(2) { width: 17%; }
-    th:nth-child(3), td:nth-child(3) { width: 15%; }
-    th:nth-child(4), td:nth-child(4) { width: 18%; }
-    th { background: var(--navy); color: var(--white); padding: 1rem; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; }
-    td { padding: 1rem; border-bottom: 1px solid var(--border); color: var(--slate); vertical-align: middle; word-wrap: break-word; }
-    tr:hover { background-color: var(--blue-pale); }
-    tr.task-overdue { background-color: var(--amber-bg) !important; }
-    tr.task-overdue td { color: var(--amber-text); }
-    tr.task-overdue strong { color: var(--navy); }
-    .badge-overdue { background-color: var(--amber-strong); color: var(--white); font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.45rem; border-radius: 4px; text-transform: uppercase; margin-top: 0.35rem; display: inline-block; }
-    .date-tag { background: var(--blue-100); color: var(--navy); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700; display: inline-block; }
-    tr.task-overdue .date-tag { background: var(--gold-light); color: var(--amber-text); }
-    .action-btn { padding: 0.55rem 0.75rem; border-radius: 6px; font-weight: 700; font-size: 0.78rem; cursor: pointer; border: 1px solid var(--blue); width: 100%; transition: all 0.15s; background: var(--white); color: var(--blue); }
-    .clear-btn:hover { background: var(--blue); color: var(--white); }
-
-    /* Dashboard Layout */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
-    .dash-widget { background: #fdfdfd; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .dash-widget h3 { color: var(--navy); font-size: 0.95rem; font-weight: 800; border-bottom: 2px solid var(--gold-light); padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; }
-    .dash-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
-    .dash-item { display: flex; flex-direction: column; padding: 0.65rem; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; }
-    .dash-item-title { font-weight: 700; color: var(--slate-deep); margin-bottom: 0.2rem; }
-    .dash-item-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--slate); }
-    .dash-item.overdue { background: var(--amber-bg); border-color: #f0c060; }
-    .dash-item.overdue .dash-item-title { color: var(--amber-text); }
-
-    /* Business Card Upload Area */
-    .file-drop-area { border: 2px dashed var(--blue); border-radius: var(--radius); padding: 3rem; text-align: center; background: var(--blue-pale); cursor: pointer; transition: background 0.2s; position: relative; }
-    .file-drop-area:hover { background: var(--blue-100); }
-    .file-drop-area input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-    .file-msg { font-size: 1rem; font-weight: 600; color: var(--navy); }
-    .file-sub { font-size: 0.85rem; color: var(--slate); margin-top: 0.5rem; }
-
-    /* --- NEW ADDITIONS FOR TEAM AND CALENDAR SECTIONS --- */
-    .team-nav-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .member-select-btn { padding: 0.65rem 1.25rem; border-radius: 999px; border: 1px solid var(--border); background: var(--white); font-weight: 700; font-size: 0.85rem; color: var(--navy); cursor: pointer; transition: all 0.2s; }
-    .member-select-btn:hover { background: var(--blue-pale); }
-    .member-select-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
-    
-    .team-perf-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-    .weekly-perf-box { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%); color: var(--white); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 4px 15px rgba(11,31,61,0.15); border-bottom: 4px solid var(--gold); }
-    .weekly-perf-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-light); }
-    .weekly-perf-count { font-size: 3.5rem; font-weight: 800; margin-top: 0.25rem; color: var(--white); }
-    
-    .tracker-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
-    .tracker-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--blue-pale); }
-    .tracker-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .tracker-label { font-size: 0.85rem; font-weight: 700; color: var(--slate); }
-    .tracker-value { font-size: 1.75rem; font-weight: 800; color: var(--blue-dark); }
-
-    .calendar-wrapper { display: flex; flex-direction: column; gap: 1rem; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--border); padding: 6px; border-radius: var(--radius-sm); }
-    .calendar-header-cell { background: var(--navy); color: var(--white); font-weight: 700; text-align: center; padding: 0.6rem 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; }
-    .calendar-day-cell { background: var(--white); min-height: 110px; border-radius: 4px; padding: 0.5rem; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.35rem; }
-    .calendar-day-cell.empty { background: rgba(0,0,0,0.02); border: 1px dashed rgba(0,0,0,0.05); }
-    .calendar-day-num { font-weight: 800; font-size: 0.8rem; color: var(--slate); margin-bottom: 0.2rem; }
-    .calendar-day-cell.today-cell { background: var(--blue-pale); border: 2px solid var(--blue); }
-    .calendar-task-tag { font-size: 0.7rem; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--blue-100); color: var(--navy); border-left: 3px solid var(--blue); }
-    .calendar-task-tag.high { background: #fef2f2; color: #991b1b; border-left-color: #ef4444; }
-    .calendar-task-tag.critical { background: var(--amber-bg); color: var(--amber-text); border-left-color: var(--amber-strong); }
-
-    @media (max-width: 900px) {
-      body { padding: 0.75rem; }
-      .app-header { padding: 1rem; flex-direction: column; align-items: flex-start; }
-      .tab-nav { width: 100%; border-radius: var(--radius-sm); }
-      .tab-btn { flex: 1; justify-content: center; text-align: center; border-radius: 6px; padding: 0.75rem; }
-      .glass-card { padding: 1.25rem; }
-      .table-container { display: none; }
-      .task-card-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
-      .task-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-      .task-card.task-overdue { background-color: var(--amber-bg); border-color: #f0c060; }
-      .task-card-title { font-weight: 700; font-size: 0.95rem; color: var(--slate-deep); }
-      .task-card-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.82rem; color: var(--slate); }
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .team-perf-container { grid-template-columns: 1fr; }
+    /* Button Interfaces */
+    .btn {
+      padding: 0.65rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    
-    .task-card-list { display: none; }
+
+    .btn-primary { background-color: var(--blue); color: white; }
+    .btn-primary:hover { background-color: var(--blue-dark); }
+    .btn-secondary { background-color: #E2E8F0; color: var(--slate-deep); }
+    .btn-secondary:hover { background-color: #CBD5E1; }
+
+    /* Dynamic Calendar Grid Architecture */
+    .calendar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .calendar-month-year {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: var(--border-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .calendar-day-header {
+      background-color: var(--blue-pale);
+      color: var(--navy);
+      font-weight: 600;
+      text-align: center;
+      padding: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .calendar-cell {
+      background-color: white;
+      min-height: 110px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .calendar-cell-empty {
+      background-color: #F1F5F9;
+    }
+
+    .calendar-date-num {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--slate);
+      margin-bottom: 0.25rem;
+    }
+
+    .calendar-item-tag {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-left: 3px solid transparent;
+    }
+
+    .tag-high { background-color: #FEF2F2; color: #991B1B; border-left-color: #EF4444; }
+    .tag-medium { background-color: #FFFBEB; color: #92400E; border-left-color: #F59E0B; }
+    .tag-low { background-color: #F8FAFC; color: #475569; border-left-color: #64748B; }
+
+    /* Drag & Drop File Upload Area */
+    .upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      text-align: center;
+      background-color: var(--bg-main);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: var(--blue);
+      background-color: var(--blue-pale);
+    }
+
+    .flash-alert {
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: none;
+    }
+    .flash-success { background-color: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+    .flash-error { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
   </style>
 </head>
 <body>
 
-  <div class="page-shell">
-    <header class="app-header">
-      <div class="brand">
-        <svg class="brand-emblem" width="36" height="36" viewBox="0 0 40 40">
-          <circle cx="20" cy="20" r="17" fill="none" stroke="var(--gold)" stroke-width="2"/>
-          <path d="M20 5 L23.5 16.5 L35 20 L23.5 23.5 L20 35 L16.5 23.5 L5 20 L16.5 16.5 Z" fill="var(--gold)"/>
-        </svg>
-        <div class="brand-text">
-          <span class="brand-title">Task Tracker</span>
-          <span class="brand-sub">Web Dashboard</span>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      💼 Automatica<span>.</span>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item active" data-target="dashboard-view"><button>📊 Global Overview</button></li>
+      <li class="nav-item" data-target="form-view"><button>➕ Create New Task</button></li>
+      <li class="nav-item" data-target="team-view"><button>👥 Team Resources</button></li>
+      <li class="nav-item" data-target="card-view"><button>📇 Business Cards</button></li>
+      <li class="nav-item" data-target="calendar-view"><button>📅 Dynamic Calendar</button></li>
+    </ul>
+  </aside>
+
+  <main class="main-wrapper">
+
+    <section id="dashboard-view" class="view-section active-view">
+      <div class="view-header">
+        <h1>Global Operations Dashboard</h1>
+        <p>Live summary of active files synchronized with your master spreadsheet.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Active Initiatives</span>
+          <span class="stat-value" id="count-active">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Urgent Priority</span>
+          <span class="stat-value" id="count-urgent" style="color: #EF4444;">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Archived Actions</span>
+          <span class="stat-value" id="count-finished" style="color: #10B981;">0</span>
         </div>
       </div>
 
-      <nav class="tab-nav" role="tablist">
-        <button type="button" class="tab-btn active" data-tab="dashboard">Dashboard</button>
-        <button type="button" class="tab-btn" data-tab="create">Create Task</button>
-        <button type="button" class="tab-btn" data-tab="todo">To Do <span class="tab-count" id="todoCount">0</span></button>
-        <button type="button" class="tab-btn" data-tab="team">Team Matrix</button>
-        <button type="button" class="tab-btn" data-tab="calendar">Calendar</button>
-        <button type="button" class="tab-btn" data-tab="cards">Business Card</button>
-      </nav>
-    </header>
+      <div class="card">
+        <div class="card-title">🚨 Urgent Backlog Matrix</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Project / Initiative</th>
+                <th>Institution</th>
+                <th>Target Action</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody id="urgent-task-table-body">
+              <tr><td colspan="6" style="text-align:center; color:var(--slate);">Loading server matrices...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-    <main class="dashboard-container">
+    <section id="form-view" class="view-section">
+      <div class="view-header">
+        <h1>Create Production Task</h1>
+        <p>Queue structural actions into target Excel registry sheets instantly.</p>
+      </div>
 
-      <section id="dashboardPanel" class="tab-panel active" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2>Dashboard</h2>
+      <div class="card" style="max-width: 850px;">
+        <div id="formFlash" class="flash-alert"></div>
+        <form id="taskSubmissionForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="project">Project / Initiative</label>
+              <input type="text" id="project" name="project" placeholder="e.g. Al Koudia Al Baida Wind Farm" required />
+            </div>
+            <div class="form-group">
+              <label for="institution">Institution / Country</label>
+              <input type="text" id="institution" name="institution" placeholder="e.g. Business Sweden" required />
+            </div>
+            <div class="form-group">
+              <label for="contact">Key Contact Person(s)</label>
+              <input type="text" id="contact" name="contact" placeholder="e.g. Yahya Maknassi-Salime" />
+            </div>
+            <div class="form-group">
+              <label for="category">Category Classification</label>
+              <select id="category" name="category">
+                <option value="Coordination">Coordination</option>
+                <option value="Courrier officiel">Courrier officiel</option>
+                <option value="Financement">Financement</option>
+                <option value="Event/Mission">Event/Mission</option>
+                <option value="Reporting">Reporting</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="state">Priority State</label>
+              <select id="state" name="state">
+                <option value="High">High Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="owner">Assigned Resource Owner</label>
+              <select id="owner" name="owner">
+                <option value="Malik">Malik</option>
+                <option value="Tarik">Tarik</option>
+                <option value="Salma">Salma</option>
+                <option value="Ghassane">Ghassane</option>
+                <option value="Nabil">Nabil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="request_date">Request Placement Date</label>
+              <input type="date" id="request_date" name="request_date" />
+            </div>
+            <div class="form-group">
+              <label for="due_date">Target Deadline (Due Date)</label>
+              <input type="date" id="due_date" name="due_date" required />
+            </div>
+            <div class="form-group">
+              <label for="sheet_select">Target Worksheet Segment</label>
+              <select id="sheet_select" name="sheet_select">
+                <option value="BackEnd">BackEnd Matrix</option>
+                <option value="MAECA">MAECA Registry</option>
+                <option value="MTEDD">MTEDD Registry</option>
+                <option value="AMCI">AMCI Registry</option>
+                <option value="DFI_GENERAL">DFI General</option>
+                <option value="Other">Custom Allocation Registry</option>
+              </select>
+            </div>
+            <div class="form-group" id="customSheetContainer" style="display: none;">
+              <label for="custom_sheet">Specify Custom Sheet Name</label>
+              <input type="text" id="custom_sheet" name="custom_sheet" placeholder="Enter clean Excel sheet name" />
+            </div>
+            <div class="form-group full-width">
+              <label for="action">Action Details / Deliverable Requirements</label>
+              <textarea id="action" name="action" rows="3" placeholder="Describe explicit action, logs, or updates..." required></textarea>
+            </div>
           </div>
-          <div class="dashboard-grid">
-            <div class="dash-widget">
-              <h3>Week Priorities</h3>
-              <ul class="dash-list" id="dashPriorities"></ul>
+          <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary">⚡ Queue Task to Synchronization Engine</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="team-view" class="view-section">
+      <div class="view-header">
+        <h1>Team Resource Resource Registry</h1>
+        <p>Monitor personalized task pipelines, timelines, and execution histories.</p>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <label style="font-size: 1rem;" for="memberSelector">Select Operating Resource:</label>
+          <select id="memberSelector" style="font-size: 1rem; padding: 0.5rem 1rem; width: 250px;">
+            <option value="Malik">Malik</option>
+            <option value="Tarik">Tarik</option>
+            <option value="Salma">Salma</option>
+            <option value="Ghassane">Ghassane</option>
+            <option value="Nabil">Nabil</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+          <div>
+            <div class="card-title" style="color: var(--blue);">📋 Upcoming Commitments (Next Tasks)</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Institution</th>
+                    <th>Action Item</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                  </tr>
+                </thead>
+                <tbody id="next-tasks-table-body">
+                  <tr><td colspan="5" style="text-align:center; color:var(--slate);">Select a team resource above.</td></tr>
+                </tbody>
+              </table>
             </div>
-            <div class="dash-widget">
-              <h3>Upcoming Meetings</h3>
-              <ul class="dash-list" id="dashMeetings"></ul>
-            </div>
-            <div class="dash-widget">
-              <h3>Upcoming Courrier</h3>
-              <ul class="dash-list" id="dashCourrier"></ul>
-            </div>
-            <div class="dash-widget">
-              <h3>Overdue Tasks</h3>
-              <ul class="dash-list" id="dashOverdue"></ul>
-            </div>
-            <div class="dash-widget">
-              <h3>Newest Tasks</h3>
-              <ul class="dash-list" id="dashNewest"></ul>
-            </div>
-            <div class="dash-widget">
-              <h3>Recently Finished</h3>
-              <ul class="dash-list" id="dashFinished"></ul>
+          </div>
+
+          <div>
+            <div class="card-title" style="color: #10B981;">✅ Finished Actions History (Last Tasks)</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Institution</th>
+                    <th>Action Item</th>
+                    <th>Priority</th>
+                    <th>Completion / Log Date</th>
+                  </tr>
+                </thead>
+                <tbody id="last-tasks-table-body">
+                  <tr><td colspan="5" style="text-align:center; color:var(--slate);">Select a team resource above.</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section id="createPanel" class="tab-panel" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2>Add New Action</h2>
-          </div>
-          <div class="flash-container"><div id="formFlash" class="alert"></div></div>
-          <form id="taskForm">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Target Sheet</label>
-                <select id="sheetSelector" name="sheet_select" required>
-                  <option value="" disabled selected>Choose Sheet destination...</option>
-                  <option value="INST_MAROC">INST_MAROC</option>
-                  <option value="MTEDD">MTEDD</option>
-                  <option value="AMCI">AMCI</option>
-                  <option value="MAECA">MAECA</option>
-                  <option value="DFI_GENERAL">DFI_GENERAL</option>
-                  <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
-                  <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
-                  <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
-                  <option value="Other">Other (Create New Tab...)</option>
-                </select>
-              </div>
-              <div class="form-group" id="customSheetContainer" style="display: none;">
-                <label>Custom Tab Sheet Name</label>
-                <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
-              </div>
-              <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" required /></div>
-              <div class="form-group"><label>Institution</label><input type="text" name="institution" required /></div>
-              <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" required /></div>
-              <div class="form-group">
-                <label>Owner Allocation</label>
-                <select name="owner" required>
-                  <option value="" disabled selected>Allocate to owner...</option>
-                  <option value="Malik">Malik</option>
-                  <option value="Tarik">Tarik</option>
-                  <option value="Salma">Salma</option>
-                  <option value="Nabil">Nabil</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Category</label>
-                <select name="category" required>
-                  <option value="Courrier">Courrier</option>
-                  <option value="Coordination">Coordination</option>
-                  <option value="Mission">Mission</option>
-                  <option value="Meeting">Meeting</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Priority</label>
-                <select name="priority" required>
-                  <option value="Low">Low</option><option value="Medium" selected>Medium</option>
-                  <option value="High">High</option><option value="Critical">Critical</option>
-                </select>
-              </div>
-              <div class="form-group"><label>Due Date</label><input type="date" name="due_date" required /></div>
-              <div class="form-group"><label>Request Date</label><input type="text" id="requestDate" name="request_date" readonly /></div>
-              <div class="form-group full-width"><label>Action / Description</label><input type="text" name="action" required /></div>
-              <div class="form-group full-width"><label>Notes</label><textarea name="notes" rows="3"></textarea></div>
-              <button type="submit" class="submit-btn">Add New Row Task →</button>
-            </div>
-          </form>
+    <section id="card-view" class="view-section">
+      <div class="view-header">
+        <h1>Business Card Intelligent Engine</h1>
+        <p>Upload corporate contact imagery to parse via local AI automation algorithms.</p>
+      </div>
+
+      <div class="card">
+        <div id="cardFlash" class="flash-alert"></div>
+        <div class="upload-box" onclick="document.getElementById('cardUpload').click()">
+          <span style="font-size: 3rem;">📇</span>
+          <h3 style="margin-top: 1rem; font-weight: 600;">Drag & Drop Contact Card Here</h3>
+          <p style="color: var(--slate); font-size: 0.9rem; margin-top: 0.25rem;">or click to browse local computer directory</p>
+          <input type="file" id="cardUpload" style="display: none;" accept="image/*" />
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section id="todoPanel" class="tab-panel" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2>To Do List</h2>
-            <div class="legend"><span class="legend-swatch"></span> Overdue highlighted</div>
-          </div>
-          <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
-          <div class="table-container">
-            <table>
-              <thead><tr><th>Task</th><th>Due Date</th><th>Owner</th><th>Operation</th></tr></thead>
-              <tbody id="taskTableBody"></tbody>
-            </table>
-          </div>
-          <div class="task-card-list" id="taskCardList"></div>
+    <section id="calendar-view" class="view-section">
+      <div class="view-header">
+        <h1>Dynamic Schedule Matrix</h1>
+        <p>Interactive chronological calendar tracker spanning past, present, and future tasks.</p>
+      </div>
+
+      <div class="card">
+        <div class="calendar-controls">
+          <button class="btn btn-secondary" id="btnPrevMonth">◀ Previous Month</button>
+          <div class="calendar-month-year" id="calendarMonthYearLabel">August 2026</div>
+          <button class="btn btn-secondary" id="btnNextMonth">Next Month ▶</button>
         </div>
-      </section>
 
-      <!-- NEW TEAM SECTION PANEL -->
-      <section id="teamPanel" class="tab-panel" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2>Team Resource Dashboard</h2>
+        <div class="calendar-grid" id="calendarGridWrapper">
           </div>
-          
-          <div class="team-nav-row">
-            <button type="button" class="member-select-btn active" data-member="Malik">Malik</button>
-            <button type="button" class="member-select-btn" data-member="Tarik">Tarik</button>
-            <button type="button" class="member-select-btn" data-member="Salma">Salma</button>
-            <button type="button" class="member-select-btn" data-member="Nabil">Nabil</button>
-          </div>
+      </div>
+    </section>
 
-          <div class="team-perf-container">
-            <div class="weekly-perf-box">
-              <span class="weekly-perf-title">Weekly Performance</span>
-              <div class="weekly-perf-count" id="teamWeeklyPerf">0</div>
-              <span style="font-size:0.75rem;opacity:0.8;">Tasks Completed This Week</span>
-            </div>
-            
-            <div class="tracker-box">
-              <div class="tracker-row">
-                <span class="tracker-label">Tasks Done This Week</span>
-                <span class="tracker-value" id="teamTrackerWeek">0</span>
-              </div>
-              <div class="tracker-row">
-                <span class="tracker-label">Total Performance Archive</span>
-                <span class="tracker-value" id="teamTrackerTotal">0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="dash-widget">
-              <h3>Last Tasks (Immediate Action)</h3>
-              <ul class="dash-list" id="teamLastTasks"></ul>
-            </div>
-            <div class="dash-widget">
-              <h3>Next Tasks (<span id="teamNextCount">0</span> Remaining)</h3>
-              <ul class="dash-list" id="teamNextTasks"></ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- NEW CALENDAR SECTION PANEL -->
-      <section id="calendarPanel" class="tab-panel" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2 id="calendarMonthTitle">Following Month Calendar</h2>
-          </div>
-          <div class="calendar-wrapper">
-            <div class="calendar-grid" id="calendarGridContainer"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="cardsPanel" class="tab-panel" role="tabpanel">
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2>Business Card Scanner Sync</h2>
-          </div>
-          <div class="flash-container"><div id="cardFlash" class="alert"></div></div>
-          <div class="file-drop-area">
-            <span class="file-msg">Append photo of business card to add directly to excel</span>
-            <div class="file-sub">(Only image files accepted. It will go directly to cards folder.)</div>
-            <input type="file" id="cardUpload" accept="image/*" />
-          </div>
-        </div>
-      </section>
-
-    </main>
-  </div>
+  </main>
 
   <script>
-    const form = document.getElementById('taskForm');
-    const tableBody = document.getElementById('taskTableBody');
-    const taskCardList = document.getElementById('taskCardList');
-    const formFlash = document.getElementById('formFlash');
-    const feedFlash = document.getElementById('feedFlash');
-    const cardFlash = document.getElementById('cardFlash');
-    const reqDateInput = document.getElementById('requestDate');
-    const todoCountEl = document.getElementById('todoCount');
-    
-    let globalActiveTasks = [];
-    let globalFinishedTasks = [];
-    let currentSelectedMember = "Malik";
-    
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    reqDateInput.value = todayStr;
-    const todayDateObj = new Date(todayStr + "T00:00:00");
+    // Unified Global Runtime AppState Definition
+    window.AppState = {
+      activeTasks: [],
+      finishedTasks: [],
+      // Calendar view engine internal baseline tracking states
+      currentCalendarYear: 2026,
+      currentCalendarMonth: 7 // 0-indexed: January=0, August=7
+    };
 
-    // Primary Nav Routing
-    document.querySelectorAll('.tab-nav .tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-nav .tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab + 'Panel').classList.add('active');
-        if (['todo', 'dashboard', 'team', 'calendar'].includes(btn.dataset.tab)) loadActiveTasksRegistry();
+    const MONTH_LABELS = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    // Bulletproof Mixed Notation Date Parsing Engine
+    function parseExcelTimelineDate(dateValue) {
+      if (!dateValue || dateValue === "N/A" || dateValue === "None") return null;
+      
+      // Clean time components if existing in string (e.g., '2026-03-19 00:00:00' -> '2026-03-19')
+      let standardStr = String(dateValue).trim().split(' ')[0];
+      
+      // Pattern Match: ISO Format YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}$/.test(standardStr)) {
+        return new Date(standardStr);
+      }
+      
+      // Pattern Match: Standard European Slash Format DD/MM/YYYY
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(standardStr)) {
+        const segments = standardStr.split('/');
+        return new Date(parseInt(segments[2], 10), parseInt(segments[1], 10) - 1, parseInt(segments[0], 10));
+      }
+      
+      const naturalParse = new Date(dateValue);
+      return isNaN(naturalParse.getTime()) ? null : naturalParse;
+    }
+
+    // Tab Switching Routing Dynamic Controller Logic
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active-view'));
+        
+        this.classList.add('active');
+        const targetViewId = this.getAttribute('data-target');
+        document.getElementById(targetViewId).classList.add('active-view');
+
+        // Context-dependent refresh layout triggers
+        if (targetViewId === 'calendar-view') {
+          renderDynamicCalendarMatrix();
+        }
+        if (targetViewId === 'team-view') {
+          processTeamResourcePipelines();
+        }
       });
     });
 
-    // Team Member Sub-Routing Subscriptions
-    document.querySelectorAll('.member-select-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.member-select-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentSelectedMember = btn.dataset.member;
-        processTeamMetrics();
+    // Form Custom Selector Component Trigger
+    const sheetSelectEl = document.getElementById('sheet_select');
+    if(sheetSelectEl) {
+      sheetSelectEl.addEventListener('change', function() {
+        document.getElementById('customSheetContainer').style.display = (this.value === 'Other') ? 'block' : 'none';
       });
-    });
+    }
 
-    document.getElementById('sheetSelector').addEventListener('change', function() {
-      const customBox = document.getElementById('customSheetContainer');
-      const customInput = document.getElementById('customSheetInput');
-      if (this.value === 'Other') { customBox.style.display = 'block'; customInput.required = true; } 
-      else { customBox.style.display = 'none'; customInput.required = false; customInput.value = ''; }
-    });
-
-    function alertBox(element, text, type = 'success') {
-      element.innerText = text;
-      element.className = `alert alert-${type}`;
+    // Flash Messaging Alert Component Helper
+    function triggerAlertBox(element, message, configuration) {
+      element.innerText = message;
+      element.className = `flash-alert flash-${configuration}`;
       element.style.display = 'block';
-      setTimeout(() => { element.style.display = 'none'; }, 5000);
+      setTimeout(() => { element.style.display = 'none'; }, 5500);
     }
 
-    function parseTaskDate(rawValue) {
-      if (!rawValue) return null;
-      const cleanStr = String(rawValue).trim();
-      if (!cleanStr || ['n/a', 'none', ''].includes(cleanStr.toLowerCase())) return null;
-      let parsed = null;
-      if (cleanStr.includes('/')) {
-        const parts = cleanStr.split('/');
-        if (parts.length === 3) parsed = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-      } else if (cleanStr.includes('-')) {
-        parsed = new Date(cleanStr + "T00:00:00");
-      }
-      return (parsed && !isNaN(parsed.getTime())) ? parsed : null;
-    }
-
-    // Helper to calculate relative ISO Calendar Weeks (Monday-Sunday boundary limits)
-    function isWithinCurrentWeek(dObj) {
-      if (!dObj) return false;
-      const current = new Date(todayStr + "T00:00:00");
-      const dayOfWeek = current.getDay() === 0 ? 7 : current.getDay();
-      
-      const monWindow = new Date(current);
-      monWindow.setDate(current.getDate() - dayOfWeek + 1);
-      
-      const sunWindow = new Date(monWindow);
-      sunWindow.setDate(monWindow.getDate() + 6);
-      sunWindow.setHours(23, 59, 59, 999);
-      
-      return dObj >= monWindow && dObj <= sunWindow;
-    }
-
-    // Core Metrics Engine for Team Tab
-    function processTeamMetrics() {
-      const target = currentSelectedMember.toLowerCase();
-      
-      const activeFiltered = globalActiveTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
-      const finishedFiltered = globalFinishedTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
-      
-      // 2.1 & 2.2 Week & Absolute trackers
-      const doneThisWeek = finishedFiltered.filter(t => {
-        return isWithinCurrentWeek(parseTaskDate(t.dueDate)) || isWithinCurrentWeek(parseTaskDate(t.requestDate));
-      }).length;
-
-      document.getElementById('teamWeeklyPerf').textContent = doneThisWeek;
-      document.getElementById('teamTrackerWeek').textContent = doneThisWeek;
-      document.getElementById('teamTrackerTotal').textContent = finishedFiltered.length;
-
-      // Sort chronological active queue
-      activeFiltered.sort((a,b) => {
-        const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
-        if(!da && !db) return 0; if(!da) return 1; if(!db) return -1;
-        return da - db;
-      });
-
-      // 2.3 Last Tasks (Top 3 immediate actions pending)
-      const lastTasksUl = document.getElementById('teamLastTasks');
-      lastTasksUl.innerHTML = '';
-      const immediateSlice = activeFiltered.slice(0, 3);
-      if(immediateSlice.length === 0) {
-        lastTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No upcoming actions.</li>';
-      } else {
-        immediateSlice.forEach(t => {
-          lastTasksUl.innerHTML += `
-            <li class="dash-item">
-              <span class="dash-item-title">${t.action}</span>
-              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span><code>${t.project}</code></span>
-            </li>`;
-        });
-      }
-
-      // 2.4 Next Tasks (Sequential future work)
-      const nextTasksUl = document.getElementById('teamNextTasks');
-      document.getElementById('teamNextCount').textContent = activeFiltered.length;
-      nextTasksUl.innerHTML = '';
-      const subsequentSlice = activeFiltered.slice(3);
-      if(subsequentSlice.length === 0) {
-        nextTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No further pending backlog items.</li>';
-      } else {
-        subsequentSlice.forEach(t => {
-          nextTasksUl.innerHTML += `
-            <li class="dash-item">
-              <span class="dash-item-title">${t.action}</span>
-              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span></span>
-            </li>`;
-        });
+    // Master Fetch Core Engine Data Sync Loader
+    async function executeMasterDataSyncPull() {
+      try {
+        const response = await fetch('/tasks');
+        if (!response.ok) throw new Error("Network response encountered operational failure.");
+        const payload = await response.json();
+        
+        window.AppState.activeTasks = payload.active || [];
+        window.AppState.finishedTasks = payload.finished || [];
+        
+        populateDashboardOverviewComponents();
+        processTeamResourcePipelines();
+        renderDynamicCalendarMatrix();
+      } catch (error) {
+        console.error("Master synchronized state pull failure:", error);
       }
     }
 
-    // Monthly Calendar Component Matrix Generator
-    function processCalendarGrid() {
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    // Populates Overview Metric Arrays and Tables
+    function populateDashboardOverviewComponents() {
+      const activeList = window.AppState.activeTasks;
+      const finishedList = window.AppState.finishedTasks;
       
-      // Calculate following month exactly
-      let targetMonth = today.getMonth() + 1;
-      let targetYear = today.getFullYear();
-      if (targetMonth > 11) {
-        targetMonth = 0;
-        targetYear += 1;
-      }
+      // Calculate active vs extreme urgent actions
+      document.getElementById('count-active').innerText = activeList.length;
+      document.getElementById('count-finished').innerText = finishedList.length;
+      
+      const extremeUrgentRows = activeList.filter(t => String(t.state || t.priority).toLowerCase() === 'high');
+      document.getElementById('count-urgent').innerText = extremeUrgentRows.length;
 
-      document.getElementById('calendarMonthTitle').textContent = `${monthNames[targetMonth]} ${targetYear} - Global Action Map`;
-      const gridContainer = document.getElementById('calendarGridContainer');
-      gridContainer.innerHTML = '';
+      const urgentTbody = document.getElementById('urgent-task-table-body');
+      if (!urgentTbody) return;
+      urgentTbody.innerHTML = '';
 
-      // Day Titles Header
-      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
-        gridContainer.innerHTML += `<div class="calendar-header-cell">${d}</div>`;
-      });
-
-      const firstDayOffset = new Date(targetYear, targetMonth, 1).getDay();
-      const totalDaysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
-
-      // Structural Layout Spacers
-      for(let i = 0; i < firstDayOffset; i++) {
-        gridContainer.innerHTML += `<div class="calendar-day-cell empty"></div>`;
-      }
-
-      // Build Individual Active Nodes
-      for(let day = 1; day <= totalDaysInMonth; day++) {
-        const matchingTasks = globalActiveTasks.filter(t => {
-          const dObj = parseTaskDate(t.dueDate);
-          return dObj && dObj.getDate() === day && dObj.getMonth() === targetMonth && dObj.getFullYear() === targetYear;
-        });
-
-        let taskAggregateHtml = '';
-        matchingTasks.forEach(t => {
-          const pri = (t.priority || '').toLowerCase();
-          taskAggregateHtml += `<div class="calendar-task-tag ${pri}" title="[${t.owner}] ${t.action}">${t.action}</div>`;
-        });
-
-        gridContainer.innerHTML += `
-          <div class="calendar-day-cell">
-            <span class="calendar-day-num">${day}</span>
-            <div style="display:flex; flex-direction:column; gap:3px; overflow-y:auto; flex-1;">
-              ${taskAggregateHtml}
-            </div>
-          </div>`;
-      }
-    }
-
-    // Render Dashboard Widgets
-    function renderDashList(elementId, items, isOverdueList = false) {
-      const ul = document.getElementById(elementId);
-      ul.innerHTML = '';
-      if (items.length === 0) {
-        ul.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No records found.</li>';
+      if (extremeUrgentRows.length === 0) {
+        urgentTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--slate);">No extreme urgent risks found in active registry queues.</td></tr>`;
         return;
       }
-      items.forEach(item => {
-        const dObj = parseTaskDate(item.dueDate);
-        const isOverdue = dObj && dObj < todayDateObj;
-        const cls = (isOverdue || isOverdueList) ? 'dash-item overdue' : 'dash-item';
-        ul.innerHTML += `
-          <li class="${cls}">
-            <span class="dash-item-title">${item.action || 'Unnamed Task'}</span>
-            <span class="dash-item-meta">
-              <span>${item.dueDate || 'N/A'}</span>
-              <code>${item.owner || ''}</code>
-            </span>
-          </li>`;
+
+      extremeUrgentRows.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:600; color:var(--navy);">${item.project || 'N/A'}</td>
+          <td>${item.institution || 'N/A'}</td>
+          <td>${item.action || 'N/A'}</td>
+          <td><span class="badge badge-high">${item.state || item.priority || 'High'}</span></td>
+          <td style="font-weight:500;">${item.due_date || 'N/A'}</td>
+          <td style="font-weight:600;">${item.owner || 'Unassigned'}</td>
+        `;
+        urgentTbody.appendChild(tr);
       });
     }
 
-    async function loadActiveTasksRegistry() {
-      try {
-        const res = await fetch('/tasks');
-        if (!res.ok) throw new Error();
-        const payload = await res.json() || {active: [], finished: []};
-        
-        globalActiveTasks = payload.active || [];
-        globalFinishedTasks = payload.finished || [];
+    // REPAIRED: Core Filtering Logic for Team Resource Section
+    function processTeamResourcePipelines() {
+      const selectedMember = document.getElementById('memberSelector').value;
+      const nextTbody = document.getElementById('next-tasks-table-body');
+      const lastTbody = document.getElementById('last-tasks-table-body');
+      
+      if (!nextTbody || !lastTbody) return;
+      
+      nextTbody.innerHTML = '';
+      lastTbody.innerHTML = '';
 
-        // Dynamic Pipeline Distribution
-        processTeamMetrics();
-        processCalendarGrid();
+      const baseTimelineLimit = new Date();
+      baseTimelineLimit.setHours(0,0,0,0); // Clear hour thresholds for clean comparisons
 
-        // Main To-Do Sorting (Soonest First)
-        const tasks = [...globalActiveTasks];
-        tasks.sort((a, b) => {
-          const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
-          if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
-          return da - db;
+      // Filter Active items matched to Owner
+      const matchedActive = window.AppState.activeTasks.filter(t => 
+        t.owner && String(t.owner).trim().toLowerCase() === selectedMember.toLowerCase()
+      );
+
+      // Filter Finished items matched to Owner
+      const matchedFinished = window.AppState.finishedTasks.filter(t => 
+        t.owner && String(t.owner).trim().toLowerCase() === selectedMember.toLowerCase()
+      );
+
+      // CRITICAL CORE FIX: Parse mixed Excel dates reliably to process sorting logic
+      const prospectiveUpcomingTasks = matchedActive.filter(task => {
+        const dateObj = parseExcelTimelineDate(task.due_date);
+        return dateObj === null || dateObj >= baseTimelineLimit; 
+      }).sort((x, y) => {
+        const dx = parseExcelTimelineDate(x.due_date);
+        const dy = parseExcelTimelineDate(y.due_date);
+        return (dx || 0) - (dy || 0);
+      });
+
+      // Assemble Finished Log Array (Last Tasks)
+      let historicallyDoneTasks = [...matchedFinished];
+      if (historicallyDoneTasks.length === 0) {
+        // Fallback: Use past active items if finished array doesn't hold data yet
+        historicallyDoneTasks = matchedActive.filter(task => {
+          const dateObj = parseExcelTimelineDate(task.due_date);
+          return dateObj !== null && dateObj < baseTimelineLimit;
         });
+      }
+      
+      historicallyDoneTasks.sort((x, y) => {
+        const dx = parseExcelTimelineDate(x.due_date || x.request_date);
+        const dy = parseExcelTimelineDate(y.due_date || y.request_date);
+        return (dy || 0) - (dx || 0); // Reverse chronological order for historical logs
+      });
 
-        // Dashboard Aggregates
-        const overdue = tasks.filter(t => parseTaskDate(t.dueDate) && parseTaskDate(t.dueDate) < todayDateObj);
-        const meetings = tasks.filter(t => (t.category||'').toLowerCase().includes('meeting'));
-        const courrier = tasks.filter(t => (t.category||'').toLowerCase().includes('courrier'));
-        
-        const dateSort = (a, b) => {
-          const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
-          if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
-          return da - db;
-        };
-        meetings.sort(dateSort);
-        courrier.sort(dateSort);
-
-        const priorities = tasks.filter(t => 
-          !(t.category||'').toLowerCase().includes('meeting') && 
-          !(t.category||'').toLowerCase().includes('courrier') && 
-          (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj)
-        );
-
-        const newest = [...tasks].sort((a, b) => {
-          const da = parseTaskDate(a.requestDate) || new Date(0);
-          const db = parseTaskDate(b.requestDate) || new Date(0);
-          return db - da; 
+      // Render Repaired Pipeline Blocks to Frontend DOM Components
+      if (prospectiveUpcomingTasks.length === 0) {
+        nextTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--slate);">No upcoming active tasks in queue for this resource.</td></tr>`;
+      } else {
+        prospectiveUpcomingTasks.forEach(t => {
+          const badgeClass = String(t.state || t.priority).toLowerCase() === 'high' ? 'badge-high' : 
+                             String(t.state || t.priority).toLowerCase() === 'medium' ? 'badge-medium' : 'badge-low';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="font-weight:600; color:var(--navy);">${t.project || 'N/A'}</td>
+            <td>${t.institution || 'N/A'}</td>
+            <td>${t.action || 'N/A'}</td>
+            <td><span class="badge ${badgeClass}">${t.state || t.priority || 'Medium'}</span></td>
+            <td style="font-weight:500;">${t.due_date || 'N/A'}</td>
+          `;
+          nextTbody.appendChild(tr);
         });
+      }
 
-        renderDashList('dashPriorities', priorities.slice(0, 7));
-        renderDashList('dashMeetings', meetings.slice(0, 7));
-        renderDashList('dashCourrier', courrier.slice(0, 7));
-        renderDashList('dashOverdue', overdue.slice(0, 7), true);
-        renderDashList('dashNewest', newest.slice(0, 7));
-        renderDashList('dashFinished', globalFinishedTasks.slice(0, 7));
-
-        todoCountEl.textContent = tasks.length;
-        tableBody.innerHTML = ''; taskCardList.innerHTML = '';
-        
-        if (tasks.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">✓ All clean!</td></tr>`;
-          taskCardList.innerHTML = `<div class="task-card empty-state" style="text-align:center;">✓ All clean!</div>`;
-          return;
-        }
-
-        tasks.forEach(task => {
-          const dueDateObj = parseTaskDate(task.dueDate);
-          const isOverdue = !!(dueDateObj && dueDateObj < todayDateObj);
-          const rowClass = isOverdue ? ' class="task-overdue"' : '';
-          const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue</span>` : '';
-          const html = `
-            <tr${rowClass}>
-              <td><strong>${task.action}</strong>${tagSpan}</td>
-              <td><span class="date-tag">${task.dueDate || 'N/A'}</span></td>
-              <td><code>${task.owner || 'Unassigned'}</code></td>
-              <td><button class="action-btn clear-btn" onclick="archiveTaskRow(${task.backendRowIndex})">Complete</button></td>
-            </tr>`;
-          tableBody.insertAdjacentHTML('beforeend', html);
-
-          const cardHtml = `
-            <div class="task-card${isOverdue ? ' task-overdue' : ''}">
-              <div class="task-card-title">${task.action}${isOverdue ? ' <span class="badge-overdue">Overdue</span>' : ''}</div>
-              <div class="task-card-meta"><span class="date-tag">${task.dueDate || 'N/A'}</span><code>${task.owner}</code></div>
-              <button class="action-btn clear-btn" onclick="archiveTaskRow(${task.backendRowIndex})">Complete</button>
-            </div>`;
-          taskCardList.insertAdjacentHTML('beforeend', cardHtml);
+      if (historicallyDoneTasks.length === 0) {
+        lastTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--slate);">No structural logging history recorded for this resource.</td></tr>`;
+      } else {
+        historicallyDoneTasks.forEach(t => {
+          const badgeClass = String(t.state || t.priority).toLowerCase() === 'high' ? 'badge-high' : 
+                             String(t.state || t.priority).toLowerCase() === 'medium' ? 'badge-medium' : 'badge-low';
+          const displayDate = t.due_date || t.request_date || 'Completed';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="font-weight:600; color:var(--slate); text-decoration: line-through;">${t.project || 'N/A'}</td>
+            <td>${t.institution || 'N/A'}</td>
+            <td>${t.action || 'N/A'}</td>
+            <td><span class="badge ${badgeClass}">${t.state || t.priority || 'Low'}</span></td>
+            <td style="font-weight:500; color:#10B981;">${displayDate}</td>
+          `;
+          lastTbody.appendChild(tr);
         });
-      } catch (err) {}
+      }
     }
 
-    async function archiveTaskRow(idx) {
-      if (idx === undefined || idx === null) return;
-      try {
-        const res = await fetch('/complete', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ backend_row_index: parseInt(idx) })
+    document.getElementById('memberSelector').addEventListener('change', processTeamResourcePipelines);
+
+    // REPAIRED & UPGRADED: Dynamic Calendar Core Engine
+    function renderDynamicCalendarMatrix() {
+      const container = document.getElementById('calendarGridWrapper');
+      const label = document.getElementById('calendarMonthYearLabel');
+      if (!container || !label) return;
+
+      container.innerHTML = '';
+      
+      const activeYear = window.AppState.currentCalendarYear;
+      const activeMonth = window.AppState.currentCalendarMonth;
+
+      label.innerText = `${MONTH_LABELS[activeMonth]} ${activeYear}`;
+
+      // Weekday Header Blocks
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      daysOfWeek.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'calendar-day-header';
+        div.innerText = day;
+        container.appendChild(div);
+      });
+
+      // Calendar Boundary Mathematics Lookups
+      const baseFirstDayIndex = new Date(activeYear, activeMonth, 1).getDay();
+      const volumeDaysInMonth = new Date(activeYear, activeMonth + 1, 0).getDate();
+
+      // Render Padding Offset Cells for Previous Month
+      for (let i = 0; i < baseFirstDayIndex; i++) {
+        const padCell = document.createElement('div');
+        padCell.className = 'calendar-cell calendar-cell-empty';
+        container.appendChild(padCell);
+      }
+
+      // Populate Live Day Matrices
+      for (let dayCounter = 1; dayCounter <= volumeDaysInMonth; dayCounter++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-cell';
+        
+        const dateNumHeader = document.createElement('div');
+        dateNumHeader.className = 'calendar-date-num';
+        dateNumHeader.innerText = dayCounter;
+        dayCell.appendChild(dateNumHeader);
+
+        // Map matching tasks to this calendar cell day block
+        window.AppState.activeTasks.forEach(task => {
+          const taskDate = parseExcelTimelineDate(task.due_date);
+          if (taskDate && 
+              taskDate.getDate() === dayCounter && 
+              taskDate.getMonth() === activeMonth && 
+              taskDate.getFullYear() === activeYear) {
+            
+            const pTag = document.createElement('div');
+            const prioStr = String(task.state || task.priority).toLowerCase();
+            const tagColorClass = prioStr === 'high' ? 'tag-high' : prioStr === 'medium' ? 'tag-medium' : 'tag-low';
+            
+            pTag.className = `calendar-item-tag ${tagColorClass}`;
+            pTag.innerText = `[${task.owner || 'Resource'}] ${task.project || 'Task'}`;
+            pTag.title = `Project: ${task.project}\nAction: ${task.action}\nOwner: ${task.owner}`;
+            dayCell.appendChild(pTag);
+          }
         });
-        if (res.ok) { alertBox(feedFlash, '✓ Task completed and queued for Excel sync.', 'success'); loadActiveTasksRegistry(); }
-      } catch {}
+
+        container.appendChild(dayCell);
+      }
+
+      // Append Post-Month Padding Grid Blocks to balance row grids
+      const totalRenderedCells = baseFirstDayIndex + volumeDaysInMonth;
+      const trailingPaddingCells = (7 - (totalRenderedCells % 7)) % 7;
+      for (let j = 0; j < trailingPaddingCells; j++) {
+        const padCell = document.createElement('div');
+        padCell.className = 'calendar-cell calendar-cell-empty';
+        container.appendChild(padCell);
+      }
     }
+
+    // Dynamic Calendar Event Listeners
+    document.getElementById('btnPrevMonth').addEventListener('click', () => {
+      window.AppState.currentCalendarMonth--;
+      if (window.AppState.currentCalendarMonth < 0) {
+        window.AppState.currentCalendarMonth = 11;
+        window.AppState.currentCalendarYear--;
+      }
+      renderDynamicCalendarMatrix();
+    });
+
+    document.getElementById('btnNextMonth').addEventListener('click', () => {
+      window.AppState.currentCalendarMonth++;
+      if (window.AppState.currentCalendarMonth > 11) {
+        window.AppState.currentCalendarMonth = 0;
+        window.AppState.currentCalendarYear++;
+      }
+      renderDynamicCalendarMatrix();
+    });
+
+    // Form Interceptor and Asynchronous Pipeline Sync Handlers
+    const form = document.getElementById('taskSubmissionForm');
+    const formFlash = document.getElementById('formFlash');
+    const todayStr = new Date().toISOString().split('T')[0];
+    const reqDateInput = document.getElementById('request_date');
+    if (reqDateInput) reqDateInput.value = todayStr;
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
         const res = await fetch('/submit', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(Object.fromEntries(new FormData(form)))
         });
         if (res.ok) {
-          alertBox(formFlash, '✓ Task successfully queued to sync!', 'success');
-          form.reset(); reqDateInput.value = todayStr;
+          triggerAlertBox(formFlash, '✓ Task successfully queued to sync!', 'success');
+          form.reset(); 
+          if (reqDateInput) reqDateInput.value = todayStr;
           document.getElementById('customSheetContainer').style.display = 'none';
-          loadActiveTasksRegistry();
+          executeMasterDataSyncPull(); // Update global memory pipeline views
+        } else {
+          triggerAlertBox(formFlash, '✕ Error processing endpoint submission request.', 'error');
         }
-      } catch {}
+      } catch {
+        triggerAlertBox(formFlash, '✕ Critical failure reaching server backend sync engines.', 'error');
+      }
     });
 
+    // Business Card Reader Binary Pipeline Handlers
+    const cardFlash = document.getElementById('cardFlash');
     document.getElementById('cardUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -743,15 +997,23 @@
             body: JSON.stringify({ filename: file.name, image_data: base64Data })
           });
           if (res.ok) {
-            alertBox(cardFlash, '✓ Card image sent to cloud!', 'success');
+            triggerAlertBox(cardFlash, '✓ Card image sent to cloud database processing!', 'success');
+          } else {
+            triggerAlertBox(cardFlash, '✕ Processing failure encountered on server upload.', 'error');
           }
-        } catch {}
+        } catch {
+          triggerAlertBox(cardFlash, '✕ Network connection timed out uploading contact data.', 'error');
+        }
       };
       reader.readAsDataURL(file);
     });
 
-    loadActiveTasksRegistry();
-    setInterval(loadActiveTasksRegistry, 15000);
+    // Initialize Application Workspace Environment on DOM Boot Load
+    document.addEventListener('DOMContentLoaded', () => {
+      executeMasterDataSyncPull();
+      // Periodically refresh states every 30 seconds
+      setInterval(executeMasterDataSyncPull, 30000);
+    });
   </script>
 </body>
 </html>
