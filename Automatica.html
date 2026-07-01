@@ -132,7 +132,34 @@
     .file-msg { font-size: 1rem; font-weight: 600; color: var(--navy); }
     .file-sub { font-size: 0.85rem; color: var(--slate); margin-top: 0.5rem; }
 
-    /* Mobile Compatibility (Bug 2 fixes included) */
+    /* --- NEW ADDITIONS FOR TEAM AND CALENDAR SECTIONS --- */
+    .team-nav-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .member-select-btn { padding: 0.65rem 1.25rem; border-radius: 999px; border: 1px solid var(--border); background: var(--white); font-weight: 700; font-size: 0.85rem; color: var(--navy); cursor: pointer; transition: all 0.2s; }
+    .member-select-btn:hover { background: var(--blue-pale); }
+    .member-select-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    
+    .team-perf-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .weekly-perf-box { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%); color: var(--white); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 4px 15px rgba(11,31,61,0.15); border-bottom: 4px solid var(--gold); }
+    .weekly-perf-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-light); }
+    .weekly-perf-count { font-size: 3.5rem; font-weight: 800; margin-top: 0.25rem; color: var(--white); }
+    
+    .tracker-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
+    .tracker-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--blue-pale); }
+    .tracker-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tracker-label { font-size: 0.85rem; font-weight: 700; color: var(--slate); }
+    .tracker-value { font-size: 1.75rem; font-weight: 800; color: var(--blue-dark); }
+
+    .calendar-wrapper { display: flex; flex-direction: column; gap: 1rem; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--border); padding: 6px; border-radius: var(--radius-sm); }
+    .calendar-header-cell { background: var(--navy); color: var(--white); font-weight: 700; text-align: center; padding: 0.6rem 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; }
+    .calendar-day-cell { background: var(--white); min-height: 110px; border-radius: 4px; padding: 0.5rem; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.35rem; }
+    .calendar-day-cell.empty { background: rgba(0,0,0,0.02); border: 1px dashed rgba(0,0,0,0.05); }
+    .calendar-day-num { font-weight: 800; font-size: 0.8rem; color: var(--slate); margin-bottom: 0.2rem; }
+    .calendar-day-cell.today-cell { background: var(--blue-pale); border: 2px solid var(--blue); }
+    .calendar-task-tag { font-size: 0.7rem; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--blue-100); color: var(--navy); border-left: 3px solid var(--blue); }
+    .calendar-task-tag.high { background: #fef2f2; color: #991b1b; border-left-color: #ef4444; }
+    .calendar-task-tag.critical { background: var(--amber-bg); color: var(--amber-text); border-left-color: var(--amber-strong); }
+
     @media (max-width: 900px) {
       body { padding: 0.75rem; }
       .app-header { padding: 1rem; flex-direction: column; align-items: flex-start; }
@@ -146,6 +173,7 @@
       .task-card-title { font-weight: 700; font-size: 0.95rem; color: var(--slate-deep); }
       .task-card-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.82rem; color: var(--slate); }
       .dashboard-grid { grid-template-columns: 1fr; }
+      .team-perf-container { grid-template-columns: 1fr; }
     }
     
     .task-card-list { display: none; }
@@ -170,6 +198,8 @@
         <button type="button" class="tab-btn active" data-tab="dashboard">Dashboard</button>
         <button type="button" class="tab-btn" data-tab="create">Create Task</button>
         <button type="button" class="tab-btn" data-tab="todo">To Do <span class="tab-count" id="todoCount">0</span></button>
+        <button type="button" class="tab-btn" data-tab="team">Team Matrix</button>
+        <button type="button" class="tab-btn" data-tab="calendar">Calendar</button>
         <button type="button" class="tab-btn" data-tab="cards">Business Card</button>
       </nav>
     </header>
@@ -240,7 +270,16 @@
               <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" required /></div>
               <div class="form-group"><label>Institution</label><input type="text" name="institution" required /></div>
               <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" required /></div>
-              <div class="form-group"><label>Owner Allocation</label><input type="text" name="owner" required /></div>
+              <div class="form-group">
+                <label>Owner Allocation</label>
+                <select name="owner" required>
+                  <option value="" disabled selected>Allocate to owner...</option>
+                  <option value="Malik">Malik</option>
+                  <option value="Tarik">Tarik</option>
+                  <option value="Salma">Salma</option>
+                  <option value="Nabil">Nabil</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label>Category</label>
                 <select name="category" required>
@@ -285,6 +324,64 @@
         </div>
       </section>
 
+      <!-- NEW TEAM SECTION PANEL -->
+      <section id="teamPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Team Resource Dashboard</h2>
+          </div>
+          
+          <div class="team-nav-row">
+            <button type="button" class="member-select-btn active" data-member="Malik">Malik</button>
+            <button type="button" class="member-select-btn" data-member="Tarik">Tarik</button>
+            <button type="button" class="member-select-btn" data-member="Salma">Salma</button>
+            <button type="button" class="member-select-btn" data-member="Nabil">Nabil</button>
+          </div>
+
+          <div class="team-perf-container">
+            <div class="weekly-perf-box">
+              <span class="weekly-perf-title">Weekly Performance</span>
+              <div class="weekly-perf-count" id="teamWeeklyPerf">0</div>
+              <span style="font-size:0.75rem;opacity:0.8;">Tasks Completed This Week</span>
+            </div>
+            
+            <div class="tracker-box">
+              <div class="tracker-row">
+                <span class="tracker-label">Tasks Done This Week</span>
+                <span class="tracker-value" id="teamTrackerWeek">0</span>
+              </div>
+              <div class="tracker-row">
+                <span class="tracker-label">Total Performance Archive</span>
+                <span class="tracker-value" id="teamTrackerTotal">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-widget">
+              <h3>Last Tasks (Immediate Action)</h3>
+              <ul class="dash-list" id="teamLastTasks"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Next Tasks (<span id="teamNextCount">0</span> Remaining)</h3>
+              <ul class="dash-list" id="teamNextTasks"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NEW CALENDAR SECTION PANEL -->
+      <section id="calendarPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2 id="calendarMonthTitle">Following Month Calendar</h2>
+          </div>
+          <div class="calendar-wrapper">
+            <div class="calendar-grid" id="calendarGridContainer"></div>
+          </div>
+        </div>
+      </section>
+
       <section id="cardsPanel" class="tab-panel" role="tabpanel">
         <div class="glass-card">
           <div class="card-header-row">
@@ -312,19 +409,33 @@
     const reqDateInput = document.getElementById('requestDate');
     const todoCountEl = document.getElementById('todoCount');
     
+    let globalActiveTasks = [];
+    let globalFinishedTasks = [];
+    let currentSelectedMember = "Malik";
+    
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     reqDateInput.value = todayStr;
     const todayDateObj = new Date(todayStr + "T00:00:00");
 
-    // Tab Logic
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Primary Nav Routing
+    document.querySelectorAll('.tab-nav .tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-nav .tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(btn.dataset.tab + 'Panel').classList.add('active');
-        if (btn.dataset.tab === 'todo' || btn.dataset.tab === 'dashboard') loadActiveTasksRegistry();
+        if (['todo', 'dashboard', 'team', 'calendar'].includes(btn.dataset.tab)) loadActiveTasksRegistry();
+      });
+    });
+
+    // Team Member Sub-Routing Subscriptions
+    document.querySelectorAll('.member-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.member-select-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSelectedMember = btn.dataset.member;
+        processTeamMetrics();
       });
     });
 
@@ -356,6 +467,131 @@
       return (parsed && !isNaN(parsed.getTime())) ? parsed : null;
     }
 
+    // Helper to calculate relative ISO Calendar Weeks (Monday-Sunday boundary limits)
+    function isWithinCurrentWeek(dObj) {
+      if (!dObj) return false;
+      const current = new Date(todayStr + "T00:00:00");
+      const dayOfWeek = current.getDay() === 0 ? 7 : current.getDay();
+      
+      const monWindow = new Date(current);
+      monWindow.setDate(current.getDate() - dayOfWeek + 1);
+      
+      const sunWindow = new Date(monWindow);
+      sunWindow.setDate(monWindow.getDate() + 6);
+      sunWindow.setHours(23, 59, 59, 999);
+      
+      return dObj >= monWindow && dObj <= sunWindow;
+    }
+
+    // Core Metrics Engine for Team Tab
+    function processTeamMetrics() {
+      const target = currentSelectedMember.toLowerCase();
+      
+      const activeFiltered = globalActiveTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
+      const finishedFiltered = globalFinishedTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
+      
+      // 2.1 & 2.2 Week & Absolute trackers
+      const doneThisWeek = finishedFiltered.filter(t => {
+        return isWithinCurrentWeek(parseTaskDate(t.dueDate)) || isWithinCurrentWeek(parseTaskDate(t.requestDate));
+      }).length;
+
+      document.getElementById('teamWeeklyPerf').textContent = doneThisWeek;
+      document.getElementById('teamTrackerWeek').textContent = doneThisWeek;
+      document.getElementById('teamTrackerTotal').textContent = finishedFiltered.length;
+
+      // Sort chronological active queue
+      activeFiltered.sort((a,b) => {
+        const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
+        if(!da && !db) return 0; if(!da) return 1; if(!db) return -1;
+        return da - db;
+      });
+
+      // 2.3 Last Tasks (Top 3 immediate actions pending)
+      const lastTasksUl = document.getElementById('teamLastTasks');
+      lastTasksUl.innerHTML = '';
+      const immediateSlice = activeFiltered.slice(0, 3);
+      if(immediateSlice.length === 0) {
+        lastTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No upcoming actions.</li>';
+      } else {
+        immediateSlice.forEach(t => {
+          lastTasksUl.innerHTML += `
+            <li class="dash-item">
+              <span class="dash-item-title">${t.action}</span>
+              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span><code>${t.project}</code></span>
+            </li>`;
+        });
+      }
+
+      // 2.4 Next Tasks (Sequential future work)
+      const nextTasksUl = document.getElementById('teamNextTasks');
+      document.getElementById('teamNextCount').textContent = activeFiltered.length;
+      nextTasksUl.innerHTML = '';
+      const subsequentSlice = activeFiltered.slice(3);
+      if(subsequentSlice.length === 0) {
+        nextTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No further pending backlog items.</li>';
+      } else {
+        subsequentSlice.forEach(t => {
+          nextTasksUl.innerHTML += `
+            <li class="dash-item">
+              <span class="dash-item-title">${t.action}</span>
+              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span></span>
+            </li>`;
+        });
+      }
+    }
+
+    // Monthly Calendar Component Matrix Generator
+    function processCalendarGrid() {
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      // Calculate following month exactly
+      let targetMonth = today.getMonth() + 1;
+      let targetYear = today.getFullYear();
+      if (targetMonth > 11) {
+        targetMonth = 0;
+        targetYear += 1;
+      }
+
+      document.getElementById('calendarMonthTitle').textContent = `${monthNames[targetMonth]} ${targetYear} - Global Action Map`;
+      const gridContainer = document.getElementById('calendarGridContainer');
+      gridContainer.innerHTML = '';
+
+      // Day Titles Header
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
+        gridContainer.innerHTML += `<div class="calendar-header-cell">${d}</div>`;
+      });
+
+      const firstDayOffset = new Date(targetYear, targetMonth, 1).getDay();
+      const totalDaysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+      // Structural Layout Spacers
+      for(let i = 0; i < firstDayOffset; i++) {
+        gridContainer.innerHTML += `<div class="calendar-day-cell empty"></div>`;
+      }
+
+      // Build Individual Active Nodes
+      for(let day = 1; day <= totalDaysInMonth; day++) {
+        const matchingTasks = globalActiveTasks.filter(t => {
+          const dObj = parseTaskDate(t.dueDate);
+          return dObj && dObj.getDate() === day && dObj.getMonth() === targetMonth && dObj.getFullYear() === targetYear;
+        });
+
+        let taskAggregateHtml = '';
+        matchingTasks.forEach(t => {
+          const pri = (t.priority || '').toLowerCase();
+          taskAggregateHtml += `<div class="calendar-task-tag ${pri}" title="[${t.owner}] ${t.action}">${t.action}</div>`;
+        });
+
+        gridContainer.innerHTML += `
+          <div class="calendar-day-cell">
+            <span class="calendar-day-num">${day}</span>
+            <div style="display:flex; flex-direction:column; gap:3px; overflow-y:auto; flex-1;">
+              ${taskAggregateHtml}
+            </div>
+          </div>`;
+      }
+    }
+
     // Render Dashboard Widgets
     function renderDashList(elementId, items, isOverdueList = false) {
       const ul = document.getElementById(elementId);
@@ -384,20 +620,24 @@
         const res = await fetch('/tasks');
         if (!res.ok) throw new Error();
         const payload = await res.json() || {active: [], finished: []};
-        const tasks = payload.active || [];
-        const finished = payload.finished || [];
+        
+        globalActiveTasks = payload.active || [];
+        globalFinishedTasks = payload.finished || [];
+
+        // Dynamic Pipeline Distribution
+        processTeamMetrics();
+        processCalendarGrid();
 
         // Main To-Do Sorting (Soonest First)
+        const tasks = [...globalActiveTasks];
         tasks.sort((a, b) => {
           const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
           if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
           return da - db;
         });
 
-        // Dashboard Sorting Logic (Bug 3 Fixes)
+        // Dashboard Aggregates
         const overdue = tasks.filter(t => parseTaskDate(t.dueDate) && parseTaskDate(t.dueDate) < todayDateObj);
-        
-        // Remove date restrictions so ALL meetings and courrier show up, then sort by nearest due date
         const meetings = tasks.filter(t => (t.category||'').toLowerCase().includes('meeting'));
         const courrier = tasks.filter(t => (t.category||'').toLowerCase().includes('courrier'));
         
@@ -415,7 +655,6 @@
           (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj)
         );
 
-        // Newest tasks by Request Date (closest to today first)
         const newest = [...tasks].sort((a, b) => {
           const da = parseTaskDate(a.requestDate) || new Date(0);
           const db = parseTaskDate(b.requestDate) || new Date(0);
@@ -427,9 +666,8 @@
         renderDashList('dashCourrier', courrier.slice(0, 7));
         renderDashList('dashOverdue', overdue.slice(0, 7), true);
         renderDashList('dashNewest', newest.slice(0, 7));
-        renderDashList('dashFinished', finished.slice(0, 7));
+        renderDashList('dashFinished', globalFinishedTasks.slice(0, 7));
 
-        // To-Do Table population
         todoCountEl.textContent = tasks.length;
         tableBody.innerHTML = ''; taskCardList.innerHTML = '';
         
@@ -491,7 +729,6 @@
       } catch {}
     });
 
-    // Business Card Upload Logic
     document.getElementById('cardUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -506,13 +743,9 @@
             body: JSON.stringify({ filename: file.name, image_data: base64Data })
           });
           if (res.ok) {
-            alertBox(cardFlash, '✓ Card image sent to cloud! The Python engine will download it to your AI folder shortly.', 'success');
-          } else {
-            alertBox(cardFlash, 'Upload failed.', 'error');
+            alertBox(cardFlash, '✓ Card image sent to cloud!', 'success');
           }
-        } catch {
-          alertBox(cardFlash, 'Network error during upload.', 'error');
-        }
+        } catch {}
       };
       reader.readAsDataURL(file);
     });
