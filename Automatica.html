@@ -93,6 +93,13 @@
     input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #CBD5E1; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.95rem; color: var(--slate-deep); background: var(--white); transition: all 0.15s ease; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     input[readonly] { background-color: #F1F5F9; color: var(--slate); cursor: not-allowed; border-color: var(--border); }
+    
+    /* Checkbox Card Display Styles */
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+    .checkbox-card { display: inline-flex; align-items: center; gap: 8px; background-color: var(--blue-pale); padding: 0.65rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--navy-soft); border: 1px solid var(--blue-100); user-select: none; transition: all 0.15s ease; text-transform: none; letter-spacing: normal; }
+    .checkbox-card:hover { background-color: var(--blue-100); border-color: var(--slate); }
+    .checkbox-card input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; width: auto; padding: 0; }
+    
     .submit-btn { grid-column: 1 / -1; width: 100%; background: var(--blue); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
     .submit-btn:hover { background: var(--blue-dark); }
 
@@ -286,25 +293,30 @@
               <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" /></div>
               <div class="form-group"><label>Institution</label><input type="text" name="institution" /></div>
               <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" /></div>
-              <div class="form-group">
-                <label>Owner Allocation</label>
-                <select name="owner" multiple required>
-                  <option value="Malik">Malik</option>
-                  <option value="Tarik">Tarik</option>
-                  <option value="Salma">Salma</option>
-                  <option value="Nabil">Nabil</option>
-                </select>
-              </div>
+              
+              <!-- Checkbox Group for Category Selection -->
               <div class="form-group">
                 <label>Category</label>
-                <select name="category" multiple required>
-                  <option value="Courrier">Courrier</option>
-                  <option value="Coordination">Coordination</option>
-                  <option value="Mission">Mission</option>
-                  <option value="Meeting">Meeting</option>
-                  <option value="Other">Other</option>
-                </select>
+                <div class="checkbox-group">
+                  <label class="checkbox-card"><input type="checkbox" name="category" value="Courrier"> Courrier</label>
+                  <label class="checkbox-card"><input type="checkbox" name="category" value="Coordination"> Coordination</label>
+                  <label class="checkbox-card"><input type="checkbox" name="category" value="Mission"> Mission</label>
+                  <label class="checkbox-card"><input type="checkbox" name="category" value="Meeting"> Meeting</label>
+                  <label class="checkbox-card"><input type="checkbox" name="category" value="Other"> Other</label>
+                </div>
               </div>
+
+              <!-- Checkbox Group for Owner Allocation Selection -->
+              <div class="form-group">
+                <label>Owner Allocation</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Malik"> Malik</label>
+                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Tarik"> Tarik</label>
+                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Salma"> Salma</label>
+                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Nabil"> Nabil</label>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label>Priority</label>
                 <select name="priority" required>
@@ -829,14 +841,22 @@
         const formData = new FormData(form);
         const dataObj = {};
         
-        for (const key of formData.keys()) {
+        // Loop through all entries to correctly string-join multi-select checkboxes
+        for (const [key, value] of formData.entries()) {
           if (key === 'owner' || key === 'category') {
-            const values = formData.getAll(key).filter(v => v !== "");
-            dataObj[key] = values.join(', ');
+            if (dataObj[key]) {
+              dataObj[key] = dataObj[key] + ", " + value;
+            } else {
+              dataObj[key] = value;
+            }
           } else {
-            dataObj[key] = formData.get(key);
+            dataObj[key] = value;
           }
         }
+
+        // Guarantee data keys exist even if zero checkboxes are ticked
+        if (!dataObj['owner']) dataObj['owner'] = '';
+        if (!dataObj['category']) dataObj['category'] = '';
 
         const res = await fetch('/submit', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
