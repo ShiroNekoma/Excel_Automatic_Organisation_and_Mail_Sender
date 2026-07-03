@@ -366,7 +366,7 @@
 
           <div class="dashboard-grid">
             <div class="dash-widget">
-              <h3>Last Tasks (Immediate Action)</h3>
+              <h3>Last Tasks</h3>
               <ul class="dash-list" id="teamLastTasks"></ul>
             </div>
             <div class="dash-widget">
@@ -396,7 +396,7 @@
       <section id="cardsPanel" class="tab-panel" role="tabpanel">
         <div class="glass-card">
           <div class="card-header-row">
-            <h2>Business Card Scanner Sync</h2>
+            <h2>Business Card Folder</h2>
           </div>
           <div class="flash-container"><div id="cardFlash" class="alert"></div></div>
           <div class="file-drop-area">
@@ -582,7 +582,7 @@
       const targetMonth = calViewMonth;
       const targetYear = calViewYear;
 
-      document.getElementById('calendarMonthTitle').textContent = `${monthNames[targetMonth]} ${targetYear} - Global Action Map`;
+      document.getElementById('calendarMonthTitle').textContent = `${monthNames[targetMonth]} ${targetYear}`;
       const gridContainer = document.getElementById('calendarGridContainer');
       gridContainer.innerHTML = '';
 
