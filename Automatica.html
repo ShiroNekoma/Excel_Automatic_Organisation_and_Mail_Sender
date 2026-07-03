@@ -166,7 +166,7 @@
     .calendar-task-tag.high { background: #FEE2E2; color: #991B1B; border-left-color: #EF4444; }
     .calendar-task-tag.critical { background: #FEF3C7; color: #92400E; border-left-color: #D97706; }
 
-    /* Weekly list view - used automatically on phone-sized screens instead of the full month grid */
+    /* Weekly list view */
     .calendar-week-list { display: none; flex-direction: column; gap: 0.65rem; }
     .calendar-week-day { background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
     .calendar-week-day.today-cell { background: #F0F4FF; border: 2px solid var(--blue); }
@@ -190,7 +190,6 @@
       .task-card-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-size: 0.85rem; color: var(--slate); }
       .task-card-meta code { background: var(--blue-pale); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--slate-deep); font-weight: 500; }
       .dashboard-grid, .team-perf-container { grid-template-columns: 1fr; }
-      /* On phones, the full month grid is replaced by the weekly list (see JS) */
       .calendar-grid { display: none !important; }
       .calendar-week-list { display: flex; }
     }
@@ -284,13 +283,12 @@
                 <label>Custom Tab Sheet Name</label>
                 <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
               </div>
-              <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" required /></div>
-              <div class="form-group"><label>Institution</label><input type="text" name="institution" required /></div>
-              <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" required /></div>
+              <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" /></div>
+              <div class="form-group"><label>Institution</label><input type="text" name="institution" /></div>
+              <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" /></div>
               <div class="form-group">
                 <label>Owner Allocation</label>
-                <select name="owner" required>
-                  <option value="" disabled selected>Allocate to owner...</option>
+                <select name="owner" multiple required>
                   <option value="Malik">Malik</option>
                   <option value="Tarik">Tarik</option>
                   <option value="Salma">Salma</option>
@@ -299,7 +297,7 @@
               </div>
               <div class="form-group">
                 <label>Category</label>
-                <select name="category" required>
+                <select name="category" multiple required>
                   <option value="Courrier">Courrier</option>
                   <option value="Coordination">Coordination</option>
                   <option value="Mission">Mission</option>
@@ -439,18 +437,14 @@
     reqDateInput.value = todayStr;
     const todayDateObj = new Date(todayStr + "T00:00:00");
 
-    // Calendar navigation state - defaults to the same "following month" view as before,
-    // but can now be moved forward/backward to any month, past or future.
     let calViewMonth = today.getMonth() + 1;
     let calViewYear = today.getFullYear();
     if (calViewMonth > 11) {
       calViewMonth = 0;
       calViewYear += 1;
     }
-    // Anchor date used by the phone week/3-day calendar views
     let calWeekAnchor = new Date(todayDateObj);
 
-    // Primary Nav Routing
     document.querySelectorAll('.tab-nav .tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-nav .tab-btn').forEach(b => b.classList.remove('active'));
@@ -461,7 +455,6 @@
       });
     });
 
-    // Team Member Sub-Routing Subscriptions
     document.querySelectorAll('.member-select-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.member-select-btn').forEach(b => b.classList.remove('active'));
@@ -471,7 +464,6 @@
       });
     });
 
-    // Calendar Prev / Today / Next Navigation - behavior adapts to the active layout
     document.getElementById('calPrevBtn').addEventListener('click', () => {
       const mode = getCalendarMode();
       if (mode === 'month') {
@@ -500,7 +492,6 @@
       processCalendarGrid();
     });
 
-    // Re-render the calendar if the viewport crosses the phone/tablet/desktop breakpoints
     let calResizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(calResizeTimer);
@@ -572,8 +563,6 @@
 
       const lastTasksUl = document.getElementById('teamLastTasks');
       lastTasksUl.innerHTML = '';
-      // globalFinishedTasks is already ordered most-recently-completed first,
-      // so the first 3 entries here are the last 3 tasks this person completed.
       const immediateSlice = finishedFiltered.slice(0, 3);
       if(immediateSlice.length === 0) {
         lastTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No completed actions yet.</li>';
@@ -590,8 +579,6 @@
       const nextTasksUl = document.getElementById('teamNextTasks');
       document.getElementById('teamNextCount').textContent = activeFiltered.length;
       nextTasksUl.innerHTML = '';
-      // activeFiltered is already sorted by due date ascending, so the first 3
-      // entries are the 3 tasks closest to (or already past) their due date.
       const subsequentSlice = activeFiltered.slice(0, 3);
       if(subsequentSlice.length === 0) {
         nextTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No further pending backlog items.</li>';
@@ -609,9 +596,6 @@
     const CAL_MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const CAL_DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-    // Decides which calendar layout to use based on screen size:
-    // full month grid on desktop/tablet, a 7-day list on phones, and a
-    // compact 3-day list on very narrow phones.
     function getCalendarMode() {
       const w = window.innerWidth;
       if (w <= 480) return 'day3';
@@ -676,8 +660,6 @@
       }
     }
 
-    // Renders a phone-friendly vertical list of `dayCount` days (7 = week view, 3 = 3-day view)
-    // anchored around calWeekAnchor, instead of squeezing the whole month grid onto a narrow screen.
     function renderCalendarDays(dayCount) {
       const weekContainer = document.getElementById('calendarWeekContainer');
       weekContainer.innerHTML = '';
@@ -844,9 +826,21 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
+        const formData = new FormData(form);
+        const dataObj = {};
+        
+        for (const key of formData.keys()) {
+          if (key === 'owner' || key === 'category') {
+            const values = formData.getAll(key).filter(v => v !== "");
+            dataObj[key] = values.join(', ');
+          } else {
+            dataObj[key] = formData.get(key);
+          }
+        }
+
         const res = await fetch('/submit', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(Object.fromEntries(new FormData(form)))
+          body: JSON.stringify(dataObj)
         });
         if (res.ok) {
           alertBox(formFlash, '✓ Task successfully queued to sync!', 'success');
