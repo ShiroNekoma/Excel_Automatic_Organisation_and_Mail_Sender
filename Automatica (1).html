@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:         #0F172A; /* Modern Deep Slate Blue */
+      --navy-soft:    #1E293B;
+      --blue:         #2563EB; /* Premium Corporate Accent */
+      --blue-dark:    #1D4ED8;
+      --blue-pale:    #F1F5F9;
+      --blue-100:     #E2E8F0;
+      --gold:         #D97706; /* Refined Amber Gold */
+      --gold-light:   #FEF3C7;
+      --amber-bg:     #FFFBEB;  
+      --amber-text:   #B45309;  
+      --amber-strong: #D97706;  
+      --slate:        #64748B;
+      --slate-deep:   #0F172A;
+      --border:       #E2E8F0;
+      --white:        #ffffff;
+      --danger-bg:    #FEF2F2;
+      --danger-text:  #991B1B;
+      --danger-border:#FCA5A5;
+      --radius:       12px;
+      --radius-sm:    8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F8FAFC;
+      min-height: 100vh;
+      padding: 2rem;
+      color: var(--slate-deep);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-shell { max-width: 1400px; margin: 0 auto; }
+
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap; background: var(--navy);
+      padding: 1.25rem 2rem; border-radius: var(--radius);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.15);
+    }
+
+    .brand { display: flex; align-items: center; gap: 1rem; }
+    .brand-emblem { flex-shrink: 0; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .brand-title { color: #fff; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.3px; }
+    .brand-sub { color: var(--slate); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.15rem; }
+
+    .tab-nav { display: flex; flex-wrap: wrap; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.35rem; gap: 0.35rem; }
+    .tab-btn {
+      border: none; background: transparent; color: #94A3B8;
+      padding: 0.6rem 1.25rem; border-radius: 8px;
+      font-family: inherit; font-weight: 600; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.03); }
+    .tab-btn.active { background: var(--blue); color: var(--white); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25); }
+    .tab-count { background: rgba(255,255,255,0.15); color: #fff; font-size: 0.7rem; font-weight: 700; min-width: 1.35rem; text-align: center; padding: 0.1rem 0.45rem; border-radius: 999px; }
+    .tab-btn.active .tab-count { background: rgba(0, 0, 0, 0.15); color: var(--white); }
+
+    .tab-panel { display: none; animation: fadeIn 0.25s ease-in-out; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .glass-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 2.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); }
+    .card-header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    h2 { color: var(--navy); font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+    .legend { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 500; color: var(--slate); }
+    .legend-swatch { width: 0.75rem; height: 0.75rem; border-radius: 4px; background: var(--amber-bg); border: 1px solid var(--amber-strong); display: inline-block; }
+
+    .flash-container { margin-bottom: 1.5rem; min-height: 0; }
+    .alert { padding: 1rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; display: none; line-height: 1.4; }
+    .alert-success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .alert-error { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+
+    /* Form Fields Styling */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .form-group { margin-bottom: 0.2rem; display: flex; flex-direction: column; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--slate); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #CBD5E1; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.95rem; color: var(--slate-deep); background: var(--white); transition: all 0.15s ease; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    input[readonly] { background-color: #F1F5F9; color: var(--slate); cursor: not-allowed; border-color: var(--border); }
+    .submit-btn { grid-column: 1 / -1; width: 100%; background: var(--blue); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+    .submit-btn:hover { background: var(--blue-dark); }
+
+    /* Tables Styling */
+    .table-container { overflow-x: auto; margin-top: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; background: var(--white); table-layout: fixed; }
+    th:nth-child(1), td:nth-child(1) { width: 45%; }
+    th:nth-child(2), td:nth-child(2) { width: 18%; }
+    th:nth-child(3), td:nth-child(3) { width: 17%; }
+    th:nth-child(4), td:nth-child(4) { width: 20%; }
+    th { background: #F8FAFC; color: var(--slate); padding: 1rem 1.25rem; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    td { padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border); color: var(--slate-deep); vertical-align: middle; word-wrap: break-word; }
+    tr:hover { background-color: #F8FAFC; }
+    tr.task-overdue { background-color: var(--amber-bg) !important; }
+    tr.task-overdue td { color: var(--amber-text); }
+    tr.task-overdue strong { color: var(--navy); }
+    .badge-overdue { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase; margin-top: 0.35rem; display: inline-block; }
+    .date-tag { background: var(--blue-pale); color: #334155; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; display: inline-block; border: 1px solid var(--border); }
+    tr.task-overdue .date-tag { background: var(--gold-light); color: var(--amber-text); border-color: #FDE68A; }
+    .action-btn { padding: 0.55rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border); width: 100%; transition: all 0.15s; background: var(--white); color: var(--slate-deep); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .clear-btn:hover { background: var(--blue); color: var(--white); border-color: var(--blue); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2); }
+
+    /* Dashboard UI Layout Overhaul */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+    .dash-widget { background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; min-height: 240px; }
+    .dash-widget h3 { color: var(--navy); font-size: 0.9rem; font-weight: 700; padding-bottom: 0.75rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .dash-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; flex-grow: 1; }
+    .dash-item { display: flex; flex-direction: column; padding: 0.75rem 1rem; background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; transition: transform 0.15s ease; }
+    .dash-item:hover { transform: translateY(-1px); border-color: #CBD5E1; }
+    .dash-item-title { font-weight: 600; color: var(--slate-deep); margin-bottom: 0.35rem; line-height: 1.4; }
+    .dash-item-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--slate); }
+    .dash-item-meta code { background: var(--white); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); font-family: inherit; font-weight: 500; color: var(--slate-deep); }
+    .dash-item.overdue { background: var(--amber-bg); border-color: #FDE68A; }
+    .dash-item.overdue .dash-item-title { color: var(--amber-text); }
+    .dash-item.overdue .dash-item-meta code { background: rgba(255,255,255,0.6); border-color: #FDE68A; }
+
+    /* Drop Area Overhaul */
+    .file-drop-area { border: 2px dashed #CBD5E1; border-radius: var(--radius); padding: 4rem 2rem; text-align: center; background: #F8FAFC; cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .file-drop-area:hover { border-color: var(--blue); background: #F0F4FF; }
+    .file-drop-area input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .file-msg { font-size: 1.05rem; font-weight: 600; color: var(--navy); display: block; }
+    .file-sub { font-size: 0.85rem; color: var(--slate); margin-top: 0.5rem; }
+
+    /* Team & Performance Styling Metrics */
+    .team-nav-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; background: #F1F5F9; padding: 0.35rem; border-radius: 10px; width: max-content; max-width: 100%; }
+    .member-select-btn { padding: 0.55rem 1.25rem; border-radius: 6px; border: none; background: transparent; font-weight: 600; font-size: 0.85rem; color: var(--slate); cursor: pointer; transition: all 0.15s ease; }
+    .member-select-btn:hover { color: var(--slate-deep); }
+    .member-select-btn.active { background: var(--white); color: var(--navy); box-shadow: 0 1px 3px rgba(15,23,42,0.08); }
+    
+    .team-perf-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .weekly-perf-box { background: var(--navy); color: var(--white); border-radius: var(--radius-sm); padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); }
+    .weekly-perf-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--slate); }
+    .weekly-perf-count { font-size: 3.5rem; font-weight: 700; margin-top: 0.25rem; color: #FFFFFF; line-height: 1; letter-spacing: -1px; }
+    
+    .tracker-box { background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; gap: 1.25rem; }
+    .tracker-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .tracker-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tracker-label { font-size: 0.88rem; font-weight: 600; color: var(--slate); }
+    .tracker-value { font-size: 1.75rem; font-weight: 700; color: var(--navy); }
+
+    /* Calendar Display Engine Matrix */
+    .calendar-wrapper { display: flex; flex-direction: column; gap: 1rem; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: var(--white); padding: 4px; border-radius: var(--radius-sm); }
+    .calendar-header-cell { background: #F8FAFC; color: var(--slate); font-weight: 600; text-align: center; padding: 0.75rem 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 6px; border: 1px solid var(--border); }
+    .calendar-day-cell { background: #FFFFFF; min-height: 120px; border-radius: 6px; padding: 0.6rem; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.4rem; border: 1px solid var(--border); }
+    .calendar-day-cell.empty { background: #F8FAFC; border-style: dashed; }
+    .calendar-day-num { font-weight: 700; font-size: 0.85rem; color: var(--slate); margin-bottom: 0.2rem; }
+    .calendar-day-cell.today-cell { background: #F0F4FF; border: 2px solid var(--blue); }
+    .calendar-task-tag { font-size: 0.72rem; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--blue-pale); color: var(--navy); border-left: 3px solid #94A3B8; }
+    .calendar-task-tag.high { background: #FEE2E2; color: #991B1B; border-left-color: #EF4444; }
+    .calendar-task-tag.critical { background: #FEF3C7; color: #92400E; border-left-color: #D97706; }
+
+    /* Vertical Mobile View Handling Overrides */
+    @media (max-width: 900px) {
+      body { padding: 1rem; }
+      .app-header { padding: 1.25rem; flex-direction: column; align-items: stretch; gap: 1rem; }
+      .brand { justify-content: center; }
+      .tab-nav { width: 100%; flex-direction: column; border-radius: var(--radius-sm); padding: 0.25rem; }
+      .tab-btn { justify-content: space-between; width: 100%; padding: 0.75rem 1rem; }
+      .glass-card { padding: 1.5rem; }
+      .table-container { display: none; }
+      .task-card-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+      .task-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+      .task-card.task-overdue { background-color: var(--amber-bg); border-color: #FDE68A; }
+      .task-card-title { font-weight: 600; font-size: 1rem; color: var(--slate-deep); line-height: 1.4; }
+      .task-card-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-size: 0.85rem; color: var(--slate); }
+      .task-card-meta code { background: var(--blue-pale); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--slate-deep); font-weight: 500; }
+      .dashboard-grid, .team-perf-container, .calendar-grid { grid-template-columns: 1fr; }
+      .calendar-day-cell { min-height: auto; padding: 0.75rem; }
+    }
+    
+    .task-card-list { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="page-shell">
+    <header class="app-header">
+      <div class="brand">
+        <svg class="brand-emblem" width="36" height="36" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="var(--blue)" stroke-width="2.5"/>
+          <path d="M20 7 L23.5 16.5 L33 20 L23.5 23.5 L20 33 L16.5 23.5 L7 20 L16.5 16.5 Z" fill="var(--blue)"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-title">Task Tracker</span>
+          <span class="brand-sub">Web Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="tab-nav" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button type="button" class="tab-btn" data-tab="create">Create Task</button>
+        <button type="button" class="tab-btn" data-tab="todo">To Do <span class="tab-count" id="todoCount">0</span></button>
+        <button type="button" class="tab-btn" data-tab="team">Stats</button>
+        <button type="button" class="tab-btn" data-tab="calendar">Calendar</button>
+        <button type="button" class="tab-btn" data-tab="cards">Business Card</button>
+      </nav>
+    </header>
+
+    <main class="dashboard-container">
+
+      <section id="dashboardPanel" class="tab-panel active" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Dashboard</h2>
+          </div>
+          <div class="dashboard-grid">
+            <div class="dash-widget">
+              <h3>Week Priorities</h3>
+              <ul class="dash-list" id="dashPriorities"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Upcoming Meetings</h3>
+              <ul class="dash-list" id="dashMeetings"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Upcoming Courrier</h3>
+              <ul class="dash-list" id="dashCourrier"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Overdue Tasks</h3>
+              <ul class="dash-list" id="dashOverdue"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Newest Tasks</h3>
+              <ul class="dash-list" id="dashNewest"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Recently Finished</h3>
+              <ul class="dash-list" id="dashFinished"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="createPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Add New Action</h2>
+          </div>
+          <div class="flash-container"><div id="formFlash" class="alert"></div></div>
+          <form id="taskForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Target Sheet</label>
+                <select id="sheetSelector" name="sheet_select" required>
+                  <option value="" disabled selected>Choose Sheet destination...</option>
+                  <option value="INST_MAROC">INST_MAROC</option>
+                  <option value="MTEDD">MTEDD</option>
+                  <option value="AMCI">AMCI</option>
+                  <option value="MAECA">MAECA</option>
+                  <option value="DFI_GENERAL">DFI_GENERAL</option>
+                  <option value="PRJ_WB_SMRI">PRJ_WB_SMRI</option>
+                  <option value="PRJ_BAD_DtP">PRJ_BAD_DtP</option>
+                  <option value="PRJ_BID_REPCA">PRJ_BID_REPCA</option>
+                  <option value="Other">Other (Create New Tab...)</option>
+                </select>
+              </div>
+              <div class="form-group" id="customSheetContainer" style="display: none;">
+                <label>Custom Tab Sheet Name</label>
+                <input type="text" id="customSheetInput" name="custom_sheet" placeholder="Type name for new tab..." />
+              </div>
+              <div class="form-group"><label>Project / Initiative</label><input type="text" name="project" required /></div>
+              <div class="form-group"><label>Institution</label><input type="text" name="institution" required /></div>
+              <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" required /></div>
+              <div class="form-group">
+                <label>Owner Allocation</label>
+                <select name="owner" required>
+                  <option value="" disabled selected>Allocate to owner...</option>
+                  <option value="Malik">Malik</option>
+                  <option value="Tarik">Tarik</option>
+                  <option value="Salma">Salma</option>
+                  <option value="Nabil">Nabil</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select name="category" required>
+                  <option value="Courrier">Courrier</option>
+                  <option value="Coordination">Coordination</option>
+                  <option value="Mission">Mission</option>
+                  <option value="Meeting">Meeting</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Priority</label>
+                <select name="priority" required>
+                  <option value="Low">Low</option><option value="Medium" selected>Medium</option>
+                  <option value="High">High</option><option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Due Date</label><input type="date" name="due_date" required /></div>
+              <div class="form-group"><label>Request Date</label><input type="text" id="requestDate" name="request_date" readonly /></div>
+              <div class="form-group full-width"><label>Action / Description</label><input type="text" name="action" required /></div>
+              <div class="form-group full-width"><label>Notes</label><textarea name="notes" rows="3"></textarea></div>
+              <button type="submit" class="submit-btn">Add New Row Task →</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="todoPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>To Do List</h2>
+            <div class="legend"><span class="legend-swatch"></span> Overdue highlighted</div>
+          </div>
+          <div class="flash-container"><div id="feedFlash" class="alert"></div></div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Task</th><th>Due Date</th><th>Owner</th><th>Operation</th></tr></thead>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+          <div class="task-card-list" id="taskCardList"></div>
+        </div>
+      </section>
+
+      <section id="teamPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Team Resource Dashboard</h2>
+          </div>
+          
+          <div class="team-nav-row">
+            <button type="button" class="member-select-btn active" data-member="Malik">Malik</button>
+            <button type="button" class="member-select-btn" data-member="Tarik">Tarik</button>
+            <button type="button" class="member-select-btn" data-member="Salma">Salma</button>
+            <button type="button" class="member-select-btn" data-member="Nabil">Nabil</button>
+          </div>
+
+          <div class="team-perf-container">
+            <div class="weekly-perf-box">
+              <span class="weekly-perf-title">Weekly Performance</span>
+              <div class="weekly-perf-count" id="teamWeeklyPerf">0</div>
+              <span style="font-size:0.8rem;color:var(--slate);margin-top:0.25rem;">Tasks Completed This Week</span>
+            </div>
+            
+            <div class="tracker-box">
+              <div class="tracker-row">
+                <span class="tracker-label">Tasks Done This Week</span>
+                <span class="tracker-value" id="teamTrackerWeek">0</span>
+              </div>
+              <div class="tracker-row">
+                <span class="tracker-label">Total Performance Archive</span>
+                <span class="tracker-value" id="teamTrackerTotal">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-widget">
+              <h3>Last Tasks (Immediate Action)</h3>
+              <ul class="dash-list" id="teamLastTasks"></ul>
+            </div>
+            <div class="dash-widget">
+              <h3>Next Tasks (<span id="teamNextCount">0</span> Remaining)</h3>
+              <ul class="dash-list" id="teamNextTasks"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="calendarPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2 id="calendarMonthTitle">Following Month Calendar</h2>
+            <div style="display:flex; gap:0.5rem;">
+              <button type="button" class="action-btn" id="calPrevBtn">‹ Prev</button>
+              <button type="button" class="action-btn" id="calTodayBtn">Today</button>
+              <button type="button" class="action-btn" id="calNextBtn">Next ›</button>
+            </div>
+          </div>
+          <div class="calendar-wrapper">
+            <div class="calendar-grid" id="calendarGridContainer"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cardsPanel" class="tab-panel" role="tabpanel">
+        <div class="glass-card">
+          <div class="card-header-row">
+            <h2>Business Card Scanner Sync</h2>
+          </div>
+          <div class="flash-container"><div id="cardFlash" class="alert"></div></div>
+          <div class="file-drop-area">
+            <span class="file-msg">Append photo of business card to add directly to excel</span>
+            <div class="file-sub">(Only image files accepted. It will go directly to cards folder.)</div>
+            <input type="file" id="cardUpload" accept="image/*" />
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById('taskForm');
+    const tableBody = document.getElementById('taskTableBody');
+    const taskCardList = document.getElementById('taskCardList');
+    const formFlash = document.getElementById('formFlash');
+    const feedFlash = document.getElementById('feedFlash');
+    const cardFlash = document.getElementById('cardFlash');
+    const reqDateInput = document.getElementById('requestDate');
+    const todoCountEl = document.getElementById('todoCount');
+    
+    let globalActiveTasks = [];
+    let globalFinishedTasks = [];
+    let currentSelectedMember = "Malik";
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    reqDateInput.value = todayStr;
+    const todayDateObj = new Date(todayStr + "T00:00:00");
+
+    // Calendar navigation state - defaults to the same "following month" view as before,
+    // but can now be moved forward/backward to any month, past or future.
+    let calViewMonth = today.getMonth() + 1;
+    let calViewYear = today.getFullYear();
+    if (calViewMonth > 11) {
+      calViewMonth = 0;
+      calViewYear += 1;
+    }
+
+    // Primary Nav Routing
+    document.querySelectorAll('.tab-nav .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-nav .tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Panel').classList.add('active');
+        if (['todo', 'dashboard', 'team', 'calendar'].includes(btn.dataset.tab)) loadActiveTasksRegistry();
+      });
+    });
+
+    // Team Member Sub-Routing Subscriptions
+    document.querySelectorAll('.member-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.member-select-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSelectedMember = btn.dataset.member;
+        processTeamMetrics();
+      });
+    });
+
+    // Calendar Prev / Today / Next Navigation
+    document.getElementById('calPrevBtn').addEventListener('click', () => {
+      calViewMonth--;
+      if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+      processCalendarGrid();
+    });
+    document.getElementById('calNextBtn').addEventListener('click', () => {
+      calViewMonth++;
+      if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+      processCalendarGrid();
+    });
+    document.getElementById('calTodayBtn').addEventListener('click', () => {
+      calViewMonth = today.getMonth() + 1;
+      calViewYear = today.getFullYear();
+      if (calViewMonth > 11) { calViewMonth = 0; calViewYear += 1; }
+      processCalendarGrid();
+    });
+
+    document.getElementById('sheetSelector').addEventListener('change', function() {
+      const customBox = document.getElementById('customSheetContainer');
+      const customInput = document.getElementById('customSheetInput');
+      if (this.value === 'Other') { customBox.style.display = 'block'; customInput.required = true; } 
+      else { customBox.style.display = 'none'; customInput.required = false; customInput.value = ''; }
+    });
+
+    function alertBox(element, text, type = 'success') {
+      element.innerText = text;
+      element.className = `alert alert-${type}`;
+      element.style.display = 'block';
+      setTimeout(() => { element.style.display = 'none'; }, 5000);
+    }
+
+    function parseTaskDate(rawValue) {
+      if (!rawValue) return null;
+      const cleanStr = String(rawValue).trim();
+      if (!cleanStr || ['n/a', 'none', ''].includes(cleanStr.toLowerCase())) return null;
+      let parsed = null;
+      if (cleanStr.includes('/')) {
+        const parts = cleanStr.split('/');
+        if (parts.length === 3) parsed = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+      } else if (cleanStr.includes('-')) {
+        parsed = new Date(cleanStr + "T00:00:00");
+      }
+      return (parsed && !isNaN(parsed.getTime())) ? parsed : null;
+    }
+
+    function isWithinCurrentWeek(dObj) {
+      if (!dObj) return false;
+      const current = new Date(todayStr + "T00:00:00");
+      const dayOfWeek = current.getDay() === 0 ? 7 : current.getDay();
+      
+      const monWindow = new Date(current);
+      monWindow.setDate(current.getDate() - dayOfWeek + 1);
+      
+      const sunWindow = new Date(monWindow);
+      sunWindow.setDate(monWindow.getDate() + 6);
+      sunWindow.setHours(23, 59, 59, 999);
+      
+      return dObj >= monWindow && dObj <= sunWindow;
+    }
+
+    function processTeamMetrics() {
+      const target = currentSelectedMember.toLowerCase();
+      
+      const activeFiltered = globalActiveTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
+      const finishedFiltered = globalFinishedTasks.filter(t => (t.owner || '').toLowerCase().includes(target));
+      
+      const doneThisWeek = finishedFiltered.filter(t => {
+        return isWithinCurrentWeek(parseTaskDate(t.dueDate)) || isWithinCurrentWeek(parseTaskDate(t.requestDate));
+      }).length;
+
+      document.getElementById('teamWeeklyPerf').textContent = doneThisWeek;
+      document.getElementById('teamTrackerWeek').textContent = doneThisWeek;
+      document.getElementById('teamTrackerTotal').textContent = finishedFiltered.length;
+
+      activeFiltered.sort((a,b) => {
+        const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
+        if(!da && !db) return 0; if(!da) return 1; if(!db) return -1;
+        return da - db;
+      });
+
+      const lastTasksUl = document.getElementById('teamLastTasks');
+      lastTasksUl.innerHTML = '';
+      // globalFinishedTasks is already ordered most-recently-completed first,
+      // so the first 3 entries here are the last 3 tasks this person completed.
+      const immediateSlice = finishedFiltered.slice(0, 3);
+      if(immediateSlice.length === 0) {
+        lastTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No completed actions yet.</li>';
+      } else {
+        immediateSlice.forEach(t => {
+          lastTasksUl.innerHTML += `
+            <li class="dash-item">
+              <span class="dash-item-title">${t.action}</span>
+              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span><code>${t.project}</code></span>
+            </li>`;
+        });
+      }
+
+      const nextTasksUl = document.getElementById('teamNextTasks');
+      document.getElementById('teamNextCount').textContent = activeFiltered.length;
+      nextTasksUl.innerHTML = '';
+      // activeFiltered is already sorted by due date ascending, so the first 3
+      // entries are the 3 tasks closest to (or already past) their due date.
+      const subsequentSlice = activeFiltered.slice(0, 3);
+      if(subsequentSlice.length === 0) {
+        nextTasksUl.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;">No further pending backlog items.</li>';
+      } else {
+        subsequentSlice.forEach(t => {
+          nextTasksUl.innerHTML += `
+            <li class="dash-item">
+              <span class="dash-item-title">${t.action}</span>
+              <span class="dash-item-meta"><span>Due: ${t.dueDate}</span></span>
+            </li>`;
+        });
+      }
+    }
+
+    function processCalendarGrid() {
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      const targetMonth = calViewMonth;
+      const targetYear = calViewYear;
+
+      document.getElementById('calendarMonthTitle').textContent = `${monthNames[targetMonth]} ${targetYear} - Global Action Map`;
+      const gridContainer = document.getElementById('calendarGridContainer');
+      gridContainer.innerHTML = '';
+
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
+        gridContainer.innerHTML += `<div class="calendar-header-cell">${d}</div>`;
+      });
+
+      const firstDayOffset = new Date(targetYear, targetMonth, 1).getDay();
+      const totalDaysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+      for(let i = 0; i < firstDayOffset; i++) {
+        gridContainer.innerHTML += `<div class="calendar-day-cell empty"></div>`;
+      }
+
+      for(let day = 1; day <= totalDaysInMonth; day++) {
+        const matchingTasks = globalActiveTasks.filter(t => {
+          const dObj = parseTaskDate(t.dueDate);
+          return dObj && dObj.getDate() === day && dObj.getMonth() === targetMonth && dObj.getFullYear() === targetYear;
+        });
+
+        let taskAggregateHtml = '';
+        matchingTasks.forEach(t => {
+          const pri = (t.priority || '').toLowerCase();
+          taskAggregateHtml += `<div class="calendar-task-tag ${pri}" title="[${t.owner}] ${t.action}">${t.action}</div>`;
+        });
+
+        gridContainer.innerHTML += `
+          <div class="calendar-day-cell">
+            <span class="calendar-day-num">${day}</span>
+            <div style="display:flex; flex-direction:column; gap:3px; overflow-y:auto; flex-grow:1;">
+              ${taskAggregateHtml}
+            </div>
+          </div>`;
+      }
+    }
+
+    function renderDashList(elementId, items, isOverdueList = false) {
+      const ul = document.getElementById(elementId);
+      ul.innerHTML = '';
+      if (items.length === 0) {
+        ul.innerHTML = '<li class="dash-item" style="color:var(--slate);text-align:center;margin:auto 0;">No records found.</li>';
+        return;
+      }
+      items.forEach(item => {
+        const dObj = parseTaskDate(item.dueDate);
+        const isOverdue = dObj && dObj < todayDateObj;
+        const cls = (isOverdue || isOverdueList) ? 'dash-item overdue' : 'dash-item';
+        ul.innerHTML += `
+          <li class="${cls}">
+            <span class="dash-item-title">${item.action || 'Unnamed Task'}</span>
+            <span class="dash-item-meta">
+              <span>${item.dueDate || 'N/A'}</span>
+              <code>${item.owner || ''}</code>
+            </span>
+          </li>`;
+      });
+    }
+
+    async function loadActiveTasksRegistry() {
+      try {
+        const res = await fetch('/tasks');
+        if (!res.ok) throw new Error();
+        const payload = await res.json() || {active: [], finished: []};
+        
+        globalActiveTasks = payload.active || [];
+        globalFinishedTasks = payload.finished || [];
+
+        processTeamMetrics();
+        processCalendarGrid();
+
+        const tasks = [...globalActiveTasks];
+        tasks.sort((a, b) => {
+          const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
+          if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
+          return da - db;
+        });
+
+        const overdue = tasks.filter(t => parseTaskDate(t.dueDate) && parseTaskDate(t.dueDate) < todayDateObj);
+        const meetings = tasks.filter(t => (t.category||'').toLowerCase().includes('meeting'));
+        const courrier = tasks.filter(t => (t.category||'').toLowerCase().includes('courrier'));
+        
+        const dateSort = (a, b) => {
+          const da = parseTaskDate(a.dueDate); const db = parseTaskDate(b.dueDate);
+          if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
+          return da - db;
+        };
+        meetings.sort(dateSort);
+        courrier.sort(dateSort);
+
+        const priorities = tasks.filter(t => 
+          !(t.category||'').toLowerCase().includes('meeting') && 
+          !(t.category||'').toLowerCase().includes('courrier') && 
+          (!parseTaskDate(t.dueDate) || parseTaskDate(t.dueDate) >= todayDateObj)
+        );
+
+        const newest = [...tasks].sort((a, b) => {
+          const da = parseTaskDate(a.requestDate) || new Date(0);
+          const db = parseTaskDate(b.requestDate) || new Date(0);
+          return db - da; 
+        });
+
+        renderDashList('dashPriorities', priorities.slice(0, 7));
+        renderDashList('dashMeetings', meetings.slice(0, 7));
+        renderDashList('dashCourrier', courrier.slice(0, 7));
+        renderDashList('dashOverdue', overdue.slice(0, 7), true);
+        renderDashList('dashNewest', newest.slice(0, 7));
+        renderDashList('dashFinished', globalFinishedTasks.slice(0, 7));
+
+        todoCountEl.textContent = tasks.length;
+        tableBody.innerHTML = ''; taskCardList.innerHTML = '';
+        
+        if (tasks.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--slate);padding:2rem;">✓ All clean!</td></tr>`;
+          taskCardList.innerHTML = `<div class="task-card" style="text-align:center;color:var(--slate);">✓ All clean!</div>`;
+          return;
+        }
+
+        tasks.forEach(task => {
+          const dueDateObj = parseTaskDate(task.dueDate);
+          const isOverdue = !!(dueDateObj && dueDateObj < todayDateObj);
+          const rowClass = isOverdue ? ' class="task-overdue"' : '';
+          const tagSpan = isOverdue ? `<br><span class="badge-overdue">Overdue</span>` : '';
+          const html = `
+            <tr${rowClass}>
+              <td><strong>${task.action}</strong>${tagSpan}</td>
+              <td><span class="date-tag">${task.dueDate || 'N/A'}</span></td>
+              <td><code>${task.owner || 'Unassigned'}</code></td>
+              <td><button class="action-btn clear-btn" onclick="archiveTaskRow(${task.backendRowIndex})">Complete</button></td>
+            </tr>`;
+          tableBody.insertAdjacentHTML('beforeend', html);
+
+          const cardHtml = `
+            <div class="task-card${isOverdue ? ' task-overdue' : ''}">
+              <div class="task-card-title">${task.action}${isOverdue ? ' <span class="badge-overdue">Overdue</span>' : ''}</div>
+              <div class="task-card-meta"><span class="date-tag">${task.dueDate || 'N/A'}</span><code>${task.owner}</code></div>
+              <button class="action-btn clear-btn" onclick="archiveTaskRow(${task.backendRowIndex})">Complete</button>
+            </div>`;
+          taskCardList.insertAdjacentHTML('beforeend', cardHtml);
+        });
+      } catch (err) {}
+    }
+
+    async function archiveTaskRow(idx) {
+      if (idx === undefined || idx === null) return;
+      try {
+        const res = await fetch('/complete', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ backend_row_index: parseInt(idx) })
+        });
+        if (res.ok) { alertBox(feedFlash, '✓ Task completed and queued for Excel sync.', 'success'); loadActiveTasksRegistry(); }
+      } catch {}
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form)))
+        });
+        if (res.ok) {
+          alertBox(formFlash, '✓ Task successfully queued to sync!', 'success');
+          form.reset(); reqDateInput.value = todayStr;
+          document.getElementById('customSheetContainer').style.display = 'none';
+          loadActiveTasksRegistry();
+        }
+      } catch {}
+    });
+
+    document.getElementById('cardUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result.split(',')[1];
+        try {
+          const res = await fetch('/upload-card', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, image_data: base64Data })
+          });
+          if (res.ok) {
+            alertBox(cardFlash, '✓ Card image sent to cloud!', 'success');
+          }
+        } catch {}
+      };
+      reader.readAsDataURL(file);
+    });
+
+    loadActiveTasksRegistry();
+    setInterval(loadActiveTasksRegistry, 15000);
+  </script>
+</body>
+</html>
