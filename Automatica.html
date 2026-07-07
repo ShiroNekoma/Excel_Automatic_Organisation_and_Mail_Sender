@@ -94,11 +94,36 @@
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     input[readonly] { background-color: #F1F5F9; color: var(--slate); cursor: not-allowed; border-color: var(--border); }
     
-    /* Checkbox Card Display Styles */
-    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-    .checkbox-card { display: inline-flex; align-items: center; gap: 8px; background-color: var(--blue-pale); padding: 0.65rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--navy-soft); border: 1px solid var(--blue-100); user-select: none; transition: all 0.15s ease; text-transform: none; letter-spacing: normal; }
-    .checkbox-card:hover { background-color: var(--blue-100); border-color: var(--slate); }
-    .checkbox-card input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; width: auto; padding: 0; }
+    /* Beautiful Checkbox Pill Styles */
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+    .checkbox-card { cursor: pointer; display: inline-block; margin: 0; }
+    .hidden-cb { position: absolute; opacity: 0; width: 0; height: 0; }
+    .cb-label { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 0.65rem 1.25rem; 
+      background: #F8FAFC; 
+      border: 1px solid #CBD5E1; 
+      border-radius: 99px; /* Pill shape */
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      color: var(--slate); 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+    .cb-label:hover { 
+      border-color: var(--blue); 
+      color: var(--blue); 
+      background: var(--blue-pale); 
+    }
+    .hidden-cb:checked + .cb-label { 
+      background: var(--blue); 
+      border-color: var(--blue); 
+      color: var(--white); 
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25); 
+      transform: translateY(-1px);
+    }
     
     .submit-btn { grid-column: 1 / -1; width: 100%; background: var(--blue); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
     .submit-btn:hover { background: var(--blue-dark); }
@@ -294,26 +319,51 @@
               <div class="form-group"><label>Institution</label><input type="text" name="institution" /></div>
               <div class="form-group"><label>Key Contacts</label><input type="text" name="contacts" /></div>
               
-              <!-- Checkbox Group for Category Selection -->
               <div class="form-group">
                 <label>Category</label>
                 <div class="checkbox-group">
-                  <label class="checkbox-card"><input type="checkbox" name="category" value="Courrier"> Courrier</label>
-                  <label class="checkbox-card"><input type="checkbox" name="category" value="Coordination"> Coordination</label>
-                  <label class="checkbox-card"><input type="checkbox" name="category" value="Mission"> Mission</label>
-                  <label class="checkbox-card"><input type="checkbox" name="category" value="Meeting"> Meeting</label>
-                  <label class="checkbox-card"><input type="checkbox" name="category" value="Other"> Other</label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="category" value="Courrier" class="hidden-cb">
+                    <span class="cb-label">Courrier</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="category" value="Coordination" class="hidden-cb">
+                    <span class="cb-label">Coordination</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="category" value="Mission" class="hidden-cb">
+                    <span class="cb-label">Mission</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="category" value="Meeting" class="hidden-cb">
+                    <span class="cb-label">Meeting</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="category" value="Other" class="hidden-cb">
+                    <span class="cb-label">Other</span>
+                  </label>
                 </div>
               </div>
 
-              <!-- Checkbox Group for Owner Allocation Selection -->
               <div class="form-group">
                 <label>Owner Allocation</label>
                 <div class="checkbox-group">
-                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Malik"> Malik</label>
-                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Tarik"> Tarik</label>
-                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Salma"> Salma</label>
-                  <label class="checkbox-card"><input type="checkbox" name="owner" value="Nabil"> Nabil</label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="owner" value="Malik" class="hidden-cb">
+                    <span class="cb-label">Malik</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="owner" value="Tarik" class="hidden-cb">
+                    <span class="cb-label">Tarik</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="owner" value="Salma" class="hidden-cb">
+                    <span class="cb-label">Salma</span>
+                  </label>
+                  <label class="checkbox-card">
+                    <input type="checkbox" name="owner" value="Nabil" class="hidden-cb">
+                    <span class="cb-label">Nabil</span>
+                  </label>
                 </div>
               </div>
 
@@ -482,20 +532,22 @@
         calViewMonth--;
         if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
       } else {
-        calWeekAnchor.setDate(calWeekAnchor.getDate() - (mode === 'day3' ? 1 : 7));
+        calWeekAnchor.setDate(calWeekAnchor.getDate() - 7);
       }
       processCalendarGrid();
     });
+    
     document.getElementById('calNextBtn').addEventListener('click', () => {
       const mode = getCalendarMode();
       if (mode === 'month') {
         calViewMonth++;
         if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
       } else {
-        calWeekAnchor.setDate(calWeekAnchor.getDate() + (mode === 'day3' ? 1 : 7));
+        calWeekAnchor.setDate(calWeekAnchor.getDate() + 7);
       }
       processCalendarGrid();
     });
+    
     document.getElementById('calTodayBtn').addEventListener('click', () => {
       calViewMonth = today.getMonth() + 1;
       calViewYear = today.getFullYear();
@@ -610,7 +662,7 @@
 
     function getCalendarMode() {
       const w = window.innerWidth;
-      if (w <= 480) return 'day3';
+      // We removed the day3 logic here. Now everything <= 900 uses the week mode.
       if (w <= 900) return 'week';
       return 'month';
     }
@@ -627,7 +679,7 @@
       } else {
         gridContainer.style.display = 'none';
         weekContainer.style.display = 'flex';
-        renderCalendarDays(mode === 'day3' ? 3 : 7);
+        renderCalendarDays(7); // Hardcoded to 7 days for mobile display
       }
     }
 
