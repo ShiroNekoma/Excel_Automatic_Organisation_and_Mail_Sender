@@ -48,7 +48,7 @@ def submit():
         task_record = {
             "project": form_data.get('project', ''),
             "institution": form_data.get('institution', ''),
-            "contact": form_data.get('contact', ''),
+            "contact": form_data.get('contacts', ''),
             "action": form_data.get('action', ''),
             "category": form_data.get('category', ''),
             "priority": form_data.get('priority', 'Medium'),
@@ -61,6 +61,20 @@ def submit():
 
         DATA_QUEUES["NEW_TASK"].append(task_record)
         return jsonify({"status": "success", "message": "Task successfully queued to sync!"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/complete', methods=['POST'])
+def complete_task():
+    try:
+        data = request.get_json() or {}
+        row_index = data.get('backend_row_index')
+        if row_index is not None:
+            DATA_QUEUES["COMPLETE_TASK"].append({
+                "backend_row_index": int(row_index)
+            })
+            return jsonify({"status": "success", "message": "Task queued for completion sync."})
+        return jsonify({"status": "error", "message": "Missing backend row index reference."}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -138,7 +152,6 @@ def generate_report():
                 "html": report_data["html"],
                 "file_id": report_id
             })
-        time.time()
         time.sleep(1)
         
     return jsonify({"status": "error", "message": "Failed to connect to local Llama 3 via pipeline. Ensure mail_reader.py and Ollama are active on your local machine."}), 500
