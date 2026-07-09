@@ -246,9 +246,10 @@
         <button type="button" class="tab-btn active" data-tab="dashboard">Dashboard</button>
         <button type="button" class="tab-btn" data-tab="create">Create Task</button>
         <button type="button" class="tab-btn" data-tab="todo">To Do <span class="tab-count" id="todoCount">0</span></button>
-        <button type="button" class="tab-btn" data-tab="team">Stats</button>
         <button type="button" class="tab-btn" data-tab="calendar">Calendar</button>
+        <button type="button" class="tab-btn" data-tab="team">Stats</button>
         <button type="button" class="tab-btn" data-tab="cards">Business Card</button>
+        <button type="button" class="tab-btn" data-tab="reports">Reports</button>
       </nav>
     </header>
 
@@ -476,6 +477,44 @@
           </div>
         </div>
       </section>
+      <section id="reportsPanel" class="tab-panel" role="tabpanel">
+  <div class="glass-card">
+    <div class="card-header-row">
+      <h2>Automated LLaMA 3 Reports</h2>
+    </div>
+    
+    <div class="flash-container"><div id="reportFlash" class="alert"></div></div>
+    
+    <div style="display:flex; gap:1rem; margin-bottom: 2rem;">
+      <button class="submit-btn" style="width:auto; padding: 0.75rem 1.5rem;" onclick="triggerReport('3m')">3 Months Report</button>
+      <button class="submit-btn" style="width:auto; padding: 0.75rem 1.5rem; background: var(--navy);" onclick="triggerReport('1y')">1 Year Report</button>
+    </div>
+
+    <!-- Loading Bar -->
+    <div id="llamaLoading" style="display: none; text-align: center; padding: 3rem 1rem;">
+      <h3 style="color: var(--navy); margin-bottom: 1.5rem; font-size: 1.1rem;">Llama 3 is thinking...</h3>
+      <div style="width: 100%; max-width: 400px; margin: 0 auto; background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; position: relative;">
+        <div style="position: absolute; top: 0; left: 0; height: 100%; width: 50%; background: var(--blue); border-radius: 99px; animation: slideLoading 1.5s infinite ease-in-out;"></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons (Download Excel) -->
+    <div id="reportActions" style="display: none; margin-bottom: 1.5rem;">
+      <a id="downloadExcelBtn" href="#" class="submit-btn" style="display: inline-block; width: auto; text-decoration: none; background: #10B981;">⬇ Download Excel Table</a>
+    </div>
+
+    <!-- Email Output Container -->
+    <div id="reportOutput" style="display: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2rem; background: #FFFFFF; color: var(--navy); overflow-x: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes slideLoading {
+    0% { left: -50%; }
+    100% { left: 100%; }
+  }
+</style>
 
     </main>
   </div>
@@ -946,6 +985,46 @@
 
     loadActiveTasksRegistry();
     setInterval(loadActiveTasksRegistry, 15000);
+    async function triggerReport(period) {
+  const loadingDiv = document.getElementById('llamaLoading');
+  const outputDiv = document.getElementById('reportOutput');
+  const actionsDiv = document.getElementById('reportActions');
+  const downloadBtn = document.getElementById('downloadExcelBtn');
+  const flash = document.getElementById('reportFlash');
+  
+  // Reset UI
+  outputDiv.style.display = 'none';
+  actionsDiv.style.display = 'none';
+  flash.style.display = 'none';
+  loadingDiv.style.display = 'block';
+
+  try {
+    const response = await fetch('/generate-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ period: period })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.status === "error") {
+      throw new Error(data.message || "Failed to generate report.");
+    }
+
+    // Populate and show the exact email format
+    outputDiv.innerHTML = data.html;
+    outputDiv.style.display = 'block';
+
+    // Setup and show the Excel download button
+    downloadBtn.href = `/download-report/${data.file_id}`;
+    actionsDiv.style.display = 'block';
+
+  } catch (error) {
+    alertBox(flash, error.message, 'error');
+  } finally {
+    loadingDiv.style.display = 'none';
+  }
+}
   </script>
 </body>
 </html>

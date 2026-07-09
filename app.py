@@ -1,6 +1,12 @@
 import os
-from datetime import datetime
-from flask import Flask, render_template, request, jsonify
+import io
+import uuid
+import json
+import time
+import base64
+import pandas as pd
+from datetime import datetime, timedelta
+from flask import Flask, render_template, request, jsonify, send_file
 
 app = Flask(__name__, template_folder='.')
 
@@ -8,11 +14,15 @@ app = Flask(__name__, template_folder='.')
 DATA_QUEUES = {
     "NEW_TASK": [],
     "COMPLETE_TASK": [],
-    "NEW_CARD": []
+    "NEW_CARD": [],
+    "NEW_REPORT_REQ": []
 }
 
 ACTIVE_EXCEL_TASKS = []
 FINISHED_EXCEL_TASKS = []
+
+GENERATED_REPORTS = {}
+REPORT_FILES = {}
 
 @app.route('/')
 def index():
@@ -33,34 +43,24 @@ def submit():
 
         target_sheet = form_data.get('sheet_select', 'BackEnd')
         if target_sheet == 'Other':
-            target_sheet = form_data.get('custom_sheet', 'CustomTab')
+            target_sheet = form_data.get('custom_sheet_name', 'BackEnd')
 
-        task_payload = {
+        task_record = {
             "project": form_data.get('project', ''),
             "institution": form_data.get('institution', ''),
-            "contacts": form_data.get('contacts', ''),
+            "contact": form_data.get('contact', ''),
             "action": form_data.get('action', ''),
             "category": form_data.get('category', ''),
-            "priority": form_data.get('priority', ''),
-            "due_date": due_date,
+            "priority": form_data.get('priority', 'Medium'),
             "request_date": req_date,
+            "due_date": due_date,
             "owner": form_data.get('owner', ''),
             "notes": form_data.get('notes', ''),
-            "target_sheet": target_sheet
+            "sheet": target_sheet
         }
-        
-        DATA_QUEUES["NEW_TASK"].append(task_payload)
-        return jsonify({"status": "success", "message": "Task queued successfully!"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/complete', methods=['POST'])
-def complete():
-    try:
-        form_data = request.get_json() if request.is_json else request.form.to_dict()
-        closure_payload = {"backend_row_index": form_data.get('backend_row_index', '')}
-        DATA_QUEUES["COMPLETE_TASK"].append(closure_payload)
-        return jsonify({"status": "success", "message": "Task completion queued!"})
+        DATA_QUEUES["NEW_TASK"].append(task_record)
+        return jsonify({"status": "success", "message": "Task successfully queued to sync!"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -78,7 +78,6 @@ def upload_card():
 
 @app.route('/tasks', methods=['GET'])
 def get_dashboard_tasks():
-    # Return both active and recently finished tasks for the dashboard
     return jsonify({
         "active": ACTIVE_EXCEL_TASKS,
         "finished": FINISHED_EXCEL_TASKS
@@ -97,9 +96,78 @@ def sync_clear():
         ACTIVE_EXCEL_TASKS = incoming_payload["active_tasks"]
     if "finished_tasks" in incoming_payload:
         FINISHED_EXCEL_TASKS = incoming_payload["finished_tasks"]
+
+    # Safely clear items that have been handled by local client
+    processed_tasks = incoming_payload.get("processed_new_tasks", [])
+    DATA_QUEUES["NEW_TASK"] = [t for t in DATA_QUEUES["NEW_TASK"] if t not in processed_tasks]
+    
+    processed_complete = incoming_payload.get("processed_complete_tasks", [])
+    DATA_QUEUES["COMPLETE_TASK"] = [t for t in DATA_QUEUES["COMPLETE_TASK"] if t not in processed_complete]
+    
+    processed_cards = incoming_payload.get("processed_cards", [])
+    DATA_QUEUES["NEW_CARD"] = [c for c in DATA_QUEUES["NEW_CARD"] if c.get('filename') not in processed_cards]
+    
+    processed_reports = incoming_payload.get("processed_reports", [])
+    DATA_QUEUES["NEW_REPORT_REQ"] = [r for r in DATA_QUEUES["NEW_REPORT_REQ"] if r.get('report_id') not in processed_reports]
+
+    return jsonify({"status": "success", "message": "Global registers synchronized."})
+
+@app.route('/generate-report', methods=['POST'])
+def generate_report():
+    data = request.get_json() or {}
+    period = data.get('period', 'weekly')
+    
+    report_id = uuid.uuid4().hex
+    
+    # Send report request variables down to the local worker queue
+    DATA_QUEUES["NEW_REPORT_REQ"].append({
+        "report_id": report_id,
+        "period": period,
+        "active_tasks": ACTIVE_EXCEL_TASKS,
+        "finished_tasks": FINISHED_EXCEL_TASKS
+    })
+    
+    # Poll waiting for the local PC client to push back the output
+    timeout = 120  # 2 minutes maximum threshold
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if report_id in GENERATED_REPORTS:
+            report_data = GENERATED_REPORTS.pop(report_id)
+            return jsonify({
+                "status": "success",
+                "html": report_data["html"],
+                "file_id": report_id
+            })
+        time.time()
+        time.sleep(1)
         
-    DATA_QUEUES = {"NEW_TASK": [], "COMPLETE_TASK": [], "NEW_CARD": []}
-    return jsonify({"status": "success", "message": "Cloud arrays updated and flushed cleanly."})
+    return jsonify({"status": "error", "message": "Failed to connect to local Llama 3 via pipeline. Ensure mail_reader.py and Ollama are active on your local machine."}), 500
+
+@app.route('/respond-report', methods=['POST'])
+def respond_report():
+    data = request.get_json() or {}
+    report_id = data.get('report_id')
+    html_content = data.get('html', '')
+    excel_base64 = data.get('excel_base64', '')
+    
+    if not report_id:
+        return jsonify({"status": "error", "message": "Missing report_id"}), 400
+        
+    GENERATED_REPORTS[report_id] = {"html": html_content.strip()}
+    if excel_base64:
+        REPORT_FILES[report_id] = base64.b64decode(excel_base64)
+        
+    return jsonify({"status": "success", "message": "Report instance loaded successfully."})
+
+@app.route('/download-report/<file_id>')
+def download_report(file_id):
+    if file_id in REPORT_FILES:
+        return send_file(
+            io.BytesIO(REPORT_FILES[file_id]), 
+            download_name=f"Tasks_Report_{datetime.today().strftime('%Y%m%d')}.xlsx",
+            as_attachment=True
+        )
+    return "Report file data instance expired or not found.", 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
