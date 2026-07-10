@@ -982,20 +982,14 @@
       reader.readAsDataURL(file);
     });
 
+    const REPORT_STORAGE_KEY = 'automatica_pending_report';
     let reportPollTimer = null;
 
     async function triggerReport(period) {
       const loadingDiv = document.getElementById('llamaLoading');
       const outputDiv = document.getElementById('reportOutput');
       const actionsDiv = document.getElementById('reportActions');
-      const downloadBtn = document.getElementById('downloadExcelBtn');
       const flash = document.getElementById('reportFlash');
-
-      // Reset any previous poll in progress
-      if (reportPollTimer) {
-        clearInterval(reportPollTimer);
-        reportPollTimer = null;
-      }
 
       outputDiv.style.display = 'none';
       actionsDiv.style.display = 'none';
@@ -1018,44 +1012,76 @@
           throw new Error(data.message || "Failed to queue report.");
         }
 
-        const reportId = data.report_id;
+        // Remember this report_id so that if the page gets reloaded (or
+        // this tab was backgrounded and the browser throttled our timer)
+        // while Llama 3 is still working, we can pick the poll back up on
+        // load instead of losing track of a report that finished fine on
+        // the server but was never fetched.
+        localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify({
+          report_id: data.report_id,
+          queued_at: Date.now()
+        }));
 
-        // Step 2: poll for completion every 2 seconds.
-        reportPollTimer = setInterval(async () => {
-          try {
-            const pollResp = await fetch(`/report-status/${reportId}`);
-            const pollData = await pollResp.json();
-
-            if (pollData.status === 'pending') {
-              return; // keep waiting, loading bar stays visible
-            }
-
-            clearInterval(reportPollTimer);
-            reportPollTimer = null;
-            loadingDiv.style.display = 'none';
-
-            if (!pollResp.ok || pollData.status === 'error') {
-              throw new Error(pollData.message || "Failed to generate report.");
-            }
-
-            outputDiv.innerHTML = pollData.html;
-            outputDiv.style.display = 'block';
-
-            downloadBtn.href = `/download-report/${pollData.file_id}`;
-            actionsDiv.style.display = 'flex';
-
-          } catch (pollError) {
-            clearInterval(reportPollTimer);
-            reportPollTimer = null;
-            loadingDiv.style.display = 'none';
-            alertBox(flash, pollError.message, 'error');
-          }
-        }, 2000);
+        pollReportStatus(data.report_id, Date.now());
 
       } catch (error) {
         loadingDiv.style.display = 'none';
         alertBox(flash, error.message, 'error');
       }
+    }
+
+    const REPORT_MAX_WAIT_MS = 5 * 60 * 1000; // give Llama 3 up to 5 minutes total
+
+    function pollReportStatus(reportId, startedAt) {
+      const loadingDiv = document.getElementById('llamaLoading');
+      const outputDiv = document.getElementById('reportOutput');
+      const actionsDiv = document.getElementById('reportActions');
+      const downloadBtn = document.getElementById('downloadExcelBtn');
+      const flash = document.getElementById('reportFlash');
+
+      if (reportPollTimer) {
+        clearInterval(reportPollTimer);
+        reportPollTimer = null;
+      }
+
+      loadingDiv.style.display = 'block';
+
+      reportPollTimer = setInterval(async () => {
+        try {
+          if (Date.now() - startedAt > REPORT_MAX_WAIT_MS) {
+            throw new Error("Timed out waiting for Llama 3. Make sure mail_reader.py and Ollama are running on your PC, then try again.");
+          }
+
+          const pollResp = await fetch(`/report-status/${reportId}`);
+          const pollData = await pollResp.json();
+
+          if (pollData.status === 'pending') {
+            return; // keep waiting, loading bar stays visible
+          }
+
+          clearInterval(reportPollTimer);
+          reportPollTimer = null;
+          loadingDiv.style.display = 'none';
+          localStorage.removeItem(REPORT_STORAGE_KEY);
+
+          if (!pollResp.ok || pollData.status === 'error') {
+            throw new Error(pollData.message || "Failed to generate report.");
+          }
+
+          outputDiv.innerHTML = pollData.html;
+          outputDiv.style.display = 'block';
+
+          downloadBtn.href = `/download-report/${pollData.file_id}`;
+          actionsDiv.style.display = 'flex';
+
+        } catch (pollError) {
+          clearInterval(reportPollTimer);
+          reportPollTimer = null;
+          loadingDiv.style.display = 'none';
+          localStorage.removeItem(REPORT_STORAGE_KEY);
+          alertBox(flash, pollError.message, 'error');
+        }
+      }, 2000);
     }
 
     function copyReportToClipboard() {
@@ -1092,6 +1118,23 @@
         document.body.removeChild(temp);
       }
     }
+
+    // If the page loads (or reloads) while a report was still being
+    // generated, resume polling for it instead of leaving it stranded.
+    (function resumePendingReport() {
+      try {
+        const saved = localStorage.getItem(REPORT_STORAGE_KEY);
+        if (!saved) return;
+        const { report_id, queued_at } = JSON.parse(saved);
+        if (!report_id || Date.now() - queued_at > 10 * 60 * 1000) {
+          localStorage.removeItem(REPORT_STORAGE_KEY);
+          return;
+        }
+        pollReportStatus(report_id, queued_at);
+      } catch (e) {
+        localStorage.removeItem(REPORT_STORAGE_KEY);
+      }
+    })();
 
     loadActiveTasksRegistry();
     setInterval(loadActiveTasksRegistry, 15000);

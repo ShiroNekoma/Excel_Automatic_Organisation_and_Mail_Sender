@@ -126,13 +126,22 @@ def sync_clear():
 
     return jsonify({"status": "success", "message": "Global registers synchronized."})
 
+REPORT_TTL_SECONDS = 15 * 60  # keep a finished report available for 15 min in case the page reloads
+
 @app.route('/generate-report', methods=['POST'])
 def generate_report():
     data = request.get_json() or {}
     period = data.get('period', 'weekly')
 
+    # Prune old entries so this dict doesn't grow forever
+    now = time.time()
+    stale_ids = [rid for rid, e in GENERATED_REPORTS.items() if now - e.get("created_at", now) > REPORT_TTL_SECONDS]
+    for rid in stale_ids:
+        GENERATED_REPORTS.pop(rid, None)
+        REPORT_FILES.pop(rid, None)
+
     report_id = uuid.uuid4().hex
-    GENERATED_REPORTS[report_id] = {"status": "pending", "created_at": time.time()}
+    GENERATED_REPORTS[report_id] = {"status": "pending", "created_at": now}
 
     # Send report request variables down to the local worker queue. This
     # endpoint no longer blocks the Flask worker thread waiting for the local
@@ -153,24 +162,26 @@ def generate_report():
 @app.route('/report-status/<report_id>', methods=['GET'])
 def report_status(report_id):
     entry = GENERATED_REPORTS.get(report_id)
-    if entry is None:
-        return jsonify({"status": "error", "message": "Unknown report_id (it may have already expired)."}), 404
 
-    if entry.get("status") == "pending":
-        # Give up waiting on the local worker after 3 minutes so the
-        # frontend doesn't poll forever if mail_reader.py isn't running.
-        if time.time() - entry.get("created_at", 0) > 180:
-            GENERATED_REPORTS.pop(report_id, None)
-            return jsonify({
-                "status": "error",
-                "message": "Failed to connect to local Llama 3 via pipeline. Ensure mail_reader.py and Ollama are active on your local machine."
-            }), 500
+    # If the entry is missing entirely (e.g. the server process restarted
+    # and wiped in-memory state) or is still pending, tell the frontend to
+    # keep waiting rather than declaring failure. mail_reader.py doesn't
+    # know or care whether the cloud "forgot" the request — it will still
+    # POST to /respond-report when Llama 3 finishes, which recreates the
+    # entry under the same report_id. Giving up here just because the
+    # entry momentarily isn't in memory would abandon a report that's
+    # genuinely still being generated. The frontend enforces its own
+    # overall timeout so this can't poll forever.
+    if entry is None or entry.get("status") == "pending":
         return jsonify({"status": "pending"})
 
-    report_data = GENERATED_REPORTS.pop(report_id)
+    # Ready — deliberately NOT deleted here. It stays available for
+    # REPORT_TTL_SECONDS so that if the browser tab reloads mid-poll, the
+    # page can just ask for it again instead of the report being silently
+    # discarded.
     return jsonify({
         "status": "success",
-        "html": report_data["html"],
+        "html": entry["html"],
         "file_id": report_id
     })
 
@@ -184,7 +195,12 @@ def respond_report():
     if not report_id:
         return jsonify({"status": "error", "message": "Missing report_id"}), 400
 
-    GENERATED_REPORTS[report_id] = {"status": "ready", "html": html_content.strip()}
+    existing = GENERATED_REPORTS.get(report_id, {})
+    GENERATED_REPORTS[report_id] = {
+        "status": "ready",
+        "html": html_content.strip(),
+        "created_at": existing.get("created_at", time.time())
+    }
     if excel_base64:
         REPORT_FILES[report_id] = base64.b64decode(excel_base64)
 
