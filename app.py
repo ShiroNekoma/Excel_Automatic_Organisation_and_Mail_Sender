@@ -130,31 +130,49 @@ def sync_clear():
 def generate_report():
     data = request.get_json() or {}
     period = data.get('period', 'weekly')
-    
+
     report_id = uuid.uuid4().hex
-    
-    # Send report request variables down to the local worker queue
+    GENERATED_REPORTS[report_id] = {"status": "pending", "created_at": time.time()}
+
+    # Send report request variables down to the local worker queue. This
+    # endpoint no longer blocks the Flask worker thread waiting for the local
+    # PC to respond — it just enqueues the request and returns immediately.
+    # The frontend polls /report-status/<report_id> until it's ready. This
+    # also avoids the single-threaded dev server deadlocking itself (the
+    # local worker's own /sync-pull and /respond-report calls could never be
+    # served while this handler was busy sleeping for up to 2 minutes).
     DATA_QUEUES["NEW_REPORT_REQ"].append({
         "report_id": report_id,
         "period": period,
         "active_tasks": ACTIVE_EXCEL_TASKS,
         "finished_tasks": FINISHED_EXCEL_TASKS
     })
-    
-    # Poll waiting for the local PC client to push back the output
-    timeout = 120  # 2 minutes maximum threshold
-    start_time = time.time()
-    while time.time() - start_time < timeout:
-        if report_id in GENERATED_REPORTS:
-            report_data = GENERATED_REPORTS.pop(report_id)
+
+    return jsonify({"status": "queued", "report_id": report_id})
+
+@app.route('/report-status/<report_id>', methods=['GET'])
+def report_status(report_id):
+    entry = GENERATED_REPORTS.get(report_id)
+    if entry is None:
+        return jsonify({"status": "error", "message": "Unknown report_id (it may have already expired)."}), 404
+
+    if entry.get("status") == "pending":
+        # Give up waiting on the local worker after 3 minutes so the
+        # frontend doesn't poll forever if mail_reader.py isn't running.
+        if time.time() - entry.get("created_at", 0) > 180:
+            GENERATED_REPORTS.pop(report_id, None)
             return jsonify({
-                "status": "success",
-                "html": report_data["html"],
-                "file_id": report_id
-            })
-        time.sleep(1)
-        
-    return jsonify({"status": "error", "message": "Failed to connect to local Llama 3 via pipeline. Ensure mail_reader.py and Ollama are active on your local machine."}), 500
+                "status": "error",
+                "message": "Failed to connect to local Llama 3 via pipeline. Ensure mail_reader.py and Ollama are active on your local machine."
+            }), 500
+        return jsonify({"status": "pending"})
+
+    report_data = GENERATED_REPORTS.pop(report_id)
+    return jsonify({
+        "status": "success",
+        "html": report_data["html"],
+        "file_id": report_id
+    })
 
 @app.route('/respond-report', methods=['POST'])
 def respond_report():
@@ -162,14 +180,14 @@ def respond_report():
     report_id = data.get('report_id')
     html_content = data.get('html', '')
     excel_base64 = data.get('excel_base64', '')
-    
+
     if not report_id:
         return jsonify({"status": "error", "message": "Missing report_id"}), 400
-        
-    GENERATED_REPORTS[report_id] = {"html": html_content.strip()}
+
+    GENERATED_REPORTS[report_id] = {"status": "ready", "html": html_content.strip()}
     if excel_base64:
         REPORT_FILES[report_id] = base64.b64decode(excel_base64)
-        
+
     return jsonify({"status": "success", "message": "Report instance loaded successfully."})
 
 @app.route('/download-report/<file_id>')
@@ -183,4 +201,7 @@ def download_report(file_id):
     return "Report file data instance expired or not found.", 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # threaded=True is important: without it, this dev server handles one
+    # request at a time, which previously caused the report feature to
+    # deadlock itself (see /generate-report above).
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

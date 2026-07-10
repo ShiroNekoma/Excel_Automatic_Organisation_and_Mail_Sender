@@ -499,13 +499,14 @@
             </div>
           </div>
 
-          <!-- Action Buttons (Download Excel) -->
-          <div id="reportActions" style="display: none; margin-bottom: 1.5rem;">
+          <!-- Action Buttons (Download Excel / Copy Text) -->
+          <div id="reportActions" style="display: none; margin-bottom: 1.5rem; gap: 0.75rem; flex-wrap: wrap;">
             <a id="downloadExcelBtn" href="#" class="submit-btn" style="display: inline-block; width: auto; text-decoration: none; background: #10B981;">⬇ Download Excel Table</a>
+            <button type="button" id="copyReportBtn" class="submit-btn" style="width:auto; background: var(--blue);" onclick="copyReportToClipboard()">📋 Copy Report Text</button>
           </div>
 
           <!-- Email Output Container -->
-          <div id="reportOutput" style="display: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2rem; background: #FFFFFF; color: var(--navy); overflow-x: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+          <div id="reportOutput" style="display: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2rem; background: #FFFFFF; color: var(--navy); overflow-x: auto; font-family: Arial, sans-serif; line-height: 1.6; user-select: text;">
           </div>
         </div>
       </section>
@@ -981,19 +982,30 @@
       reader.readAsDataURL(file);
     });
 
+    let reportPollTimer = null;
+
     async function triggerReport(period) {
       const loadingDiv = document.getElementById('llamaLoading');
       const outputDiv = document.getElementById('reportOutput');
       const actionsDiv = document.getElementById('reportActions');
       const downloadBtn = document.getElementById('downloadExcelBtn');
       const flash = document.getElementById('reportFlash');
-      
+
+      // Reset any previous poll in progress
+      if (reportPollTimer) {
+        clearInterval(reportPollTimer);
+        reportPollTimer = null;
+      }
+
       outputDiv.style.display = 'none';
       actionsDiv.style.display = 'none';
       flash.style.display = 'none';
       loadingDiv.style.display = 'block';
 
       try {
+        // Step 1: queue the report request. This returns immediately —
+        // the actual Llama 3 generation happens locally on the PC running
+        // mail_reader.py and is picked up on its next sync cycle.
         const response = await fetch('/generate-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1003,20 +1015,81 @@
         const data = await response.json();
 
         if (!response.ok || data.status === "error") {
-          throw new Error(data.message || "Failed to generate report.");
+          throw new Error(data.message || "Failed to queue report.");
         }
 
-        outputDiv.innerHTML = data.html;
-        outputDiv.style.display = 'block';
+        const reportId = data.report_id;
 
-        downloadBtn.href = `/download-report/${data.file_id}`;
-        actionsDiv.style.display = 'block';
+        // Step 2: poll for completion every 2 seconds.
+        reportPollTimer = setInterval(async () => {
+          try {
+            const pollResp = await fetch(`/report-status/${reportId}`);
+            const pollData = await pollResp.json();
+
+            if (pollData.status === 'pending') {
+              return; // keep waiting, loading bar stays visible
+            }
+
+            clearInterval(reportPollTimer);
+            reportPollTimer = null;
+            loadingDiv.style.display = 'none';
+
+            if (!pollResp.ok || pollData.status === 'error') {
+              throw new Error(pollData.message || "Failed to generate report.");
+            }
+
+            outputDiv.innerHTML = pollData.html;
+            outputDiv.style.display = 'block';
+
+            downloadBtn.href = `/download-report/${pollData.file_id}`;
+            actionsDiv.style.display = 'flex';
+
+          } catch (pollError) {
+            clearInterval(reportPollTimer);
+            reportPollTimer = null;
+            loadingDiv.style.display = 'none';
+            alertBox(flash, pollError.message, 'error');
+          }
+        }, 2000);
 
       } catch (error) {
-        alertBox(flash, error.message, 'error');
-      } finally {
-        loadingDiv.style.none = 'none';
         loadingDiv.style.display = 'none';
+        alertBox(flash, error.message, 'error');
+      }
+    }
+
+    function copyReportToClipboard() {
+      const outputDiv = document.getElementById('reportOutput');
+      const flash = document.getElementById('reportFlash');
+      const text = outputDiv.innerText;
+
+      const showCopied = () => {
+        const btn = document.getElementById('copyReportBtn');
+        const original = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopied).catch(() => {
+          alertBox(flash, "Could not copy automatically — please select the text manually.", 'error');
+        });
+      } else {
+        // Fallback for older browsers / non-HTTPS contexts
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.style.position = 'fixed';
+        temp.style.opacity = '0';
+        document.body.appendChild(temp);
+        temp.focus();
+        temp.select();
+        try {
+          document.execCommand('copy');
+          showCopied();
+        } catch (e) {
+          alertBox(flash, "Could not copy automatically — please select the text manually.", 'error');
+        }
+        document.body.removeChild(temp);
       }
     }
 
