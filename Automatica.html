@@ -493,10 +493,12 @@
 
           <!-- Loading Bar -->
           <div id="llamaLoading" style="display: none; text-align: center; padding: 3rem 1rem;">
-            <h3 style="color: var(--navy); margin-bottom: 1.5rem; font-size: 1.1rem;">Llama 3 is thinking...</h3>
-            <div style="width: 100%; max-width: 400px; margin: 0 auto; background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; position: relative;">
+            <h3 style="color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">Llama 3 is thinking...</h3>
+            <p id="llamaLoadingStatus" style="color: var(--text-light, #6B7280); font-size: 0.9rem; margin-bottom: 1.5rem;">This can take several minutes for longer reports — keep this tab open.</p>
+            <div style="width: 100%; max-width: 400px; margin: 0 auto 1.5rem; background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; position: relative;">
               <div style="position: absolute; top: 0; left: 0; height: 100%; width: 50%; background: var(--blue); border-radius: 99px; animation: slideLoading 1.5s infinite ease-in-out;"></div>
             </div>
+            <button type="button" class="submit-btn" style="width:auto; background: #9CA3AF;" onclick="cancelReportPoll()">Cancel</button>
           </div>
 
           <!-- Action Buttons (Download Excel / Copy Text) -->
@@ -1030,10 +1032,20 @@
       }
     }
 
-    const REPORT_MAX_WAIT_MS = 5 * 60 * 1000; // give Llama 3 up to 5 minutes total
+    const REPORT_MAX_WAIT_MS = 30 * 60 * 1000; // 30 min hard cap — local CPU inference on longer reports can genuinely take a while
+
+    function cancelReportPoll() {
+      if (reportPollTimer) {
+        clearInterval(reportPollTimer);
+        reportPollTimer = null;
+      }
+      localStorage.removeItem(REPORT_STORAGE_KEY);
+      document.getElementById('llamaLoading').style.display = 'none';
+    }
 
     function pollReportStatus(reportId, startedAt) {
       const loadingDiv = document.getElementById('llamaLoading');
+      const statusText = document.getElementById('llamaLoadingStatus');
       const outputDiv = document.getElementById('reportOutput');
       const actionsDiv = document.getElementById('reportActions');
       const downloadBtn = document.getElementById('downloadExcelBtn');
@@ -1045,11 +1057,23 @@
       }
 
       loadingDiv.style.display = 'block';
+      statusText.textContent = 'This can take several minutes for longer reports — keep this tab open.';
 
       reportPollTimer = setInterval(async () => {
         try {
-          if (Date.now() - startedAt > REPORT_MAX_WAIT_MS) {
-            throw new Error("Timed out waiting for Llama 3. Make sure mail_reader.py and Ollama are running on your PC, then try again.");
+          const elapsed = Date.now() - startedAt;
+
+          if (elapsed > REPORT_MAX_WAIT_MS) {
+            throw new Error("Still no answer after 30 minutes. mail_reader.py / Ollama may have stalled or lost connection — check the terminal, then try again.");
+          }
+
+          // Reassure rather than alarm: Llama 3 on local CPU can genuinely
+          // take a long time for bigger reports, so we only update the
+          // wording — we never fail just because time has passed.
+          if (elapsed > 10 * 60 * 1000) {
+            statusText.textContent = "Still working — this is a long one. Llama 3 is still generating the answer.";
+          } else if (elapsed > 3 * 60 * 1000) {
+            statusText.textContent = "Still thinking... this one is taking longer than usual.";
           }
 
           const pollResp = await fetch(`/report-status/${reportId}`);
